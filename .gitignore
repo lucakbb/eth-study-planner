@@ -28,8 +28,9 @@
 **/*.framework
 **/*.xcodeproj/project.xcworkspace/xcshareddata/
 
-# Google Firebase Config
+# Config Files
 **/GoogleService-Info.plist
+**/Secrets.plist
 
 # OS X
 .DS_Store
