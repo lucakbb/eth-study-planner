@@ -1,0 +1,41 @@
+# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
+
+## User settings
+**/xcuserdata/
+**/DerivedData/
+**/*.xcworkspace/
+**/*.xcuserstate
+**/*.mode1v3
+**/*.pbxuser
+
+## Obj-C/Swift specific
+*.hmap
+
+## App packaging
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+**/Packages/
+**/Package.pins
+**/Package.resolved
+
+## Build artifacts
+**/Build/
+**/*.app
+**/*.xcarchive
+**/*.framework
+**/*.xcodeproj/project.xcworkspace/xcshareddata/
+
+# Google Firebase Config
+**/GoogleService-Info.plist
+
+# OS X
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
