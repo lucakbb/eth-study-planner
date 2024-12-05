@@ -13,6 +13,8 @@ Additionally, populate Firestore with sample data under the path ```courses/[cou
 
 Moreover, add a document ```general/lastCourseUpdate``` which contains the field ```date```. This date serves as a reference for the local cache, indicating the last update of the courses and determining when a refresh is required.
 
+Finally, you should configure your Firebase project to use AppCheck. To do so, follow this [official AppCheck setup guide](https://firebase.google.com/docs/app-check/ios/app-attest-provider).
+
 # How to Contribute
 We greatly appreciate your interest in contributing to the app. Below, you will find a concise guide on how you can support the project and get involved effectively.
 
