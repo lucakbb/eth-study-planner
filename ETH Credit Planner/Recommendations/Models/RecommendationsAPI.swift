@@ -58,7 +58,7 @@ class RecommendationsAPI: ObservableObject {
                 guard let path = Bundle.main.path(forResource: "Secrets", ofType: "plist"),
                       let secrets = NSDictionary(contentsOfFile: path),
                       let apiUrl = secrets["API_URL"] as? String else {
-                    completion(.failure(NSError(domain: "Secrets.plist not found or missing API_BASE_URL", code: 0, userInfo: nil)))
+                    completion(.failure(NSError(domain: "Secrets.plist not found or missing API_URL", code: 0, userInfo: nil)))
                     return
                 }
 
