@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SimpleAnalytics
+import CoreData
 
 struct CategoryOverviewView: View {
     @FetchRequest var courses: FetchedResults<Course>
@@ -233,15 +234,24 @@ struct AddCourseButton: View {
 }
 
 #Preview {
-    let context = PersistenceController.preview.container.viewContext
-    let firstYearCourses = Category(context: context)
+    let context = PersistenceController.shared.container.viewContext
+    let viewModel = OnboardingViewModel()
+    let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
     
-    CategoryOverviewView(category: firstYearCourses)
-        .onAppear {
-            firstYearCourses.id = 0
-            firstYearCourses.name = "First Year Courses"
-            firstYearCourses.icon = "book.closed.fill"
-            firstYearCourses.maxCredits = 56
-            firstYearCourses.minCredits = 56
+    do {
+        if try context.count(for: fetchRequest) == 0 {
+            Task {
+                try await viewModel.createDefaultCourses()
+            }
         }
+    } catch {
+        print("Error checking or creating default courses: \(error)")
+    }
+    
+    if let category = try? context.fetch(fetchRequest).first {
+        return CategoryOverviewView(category: category)
+            .environment(\.managedObjectContext, context)
+    } else {
+        return Text("No categories found")
+    }
 }

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SimpleAnalytics
+import CoreData
 
 struct TemplateCategoryView: View {
     @ObservedObject var viewModel: TemplateOverviewViewModel = TemplateOverviewViewModel()
@@ -123,5 +124,27 @@ struct TemplateCategoryView: View {
 }
 
 #Preview {
-    TemplateCategoryView(isPresented: .constant(true), template: Template(id: UUID(), title: "Machine Learning", shareCode: "", authorName: "Simon", authorID: "123", likes: [], amountOfLikes: 0, tags: ["Machine Learning", "Coding", "Algorithms"], courses: [], amountOfSemesters: 0, amountOfCourses: 0), isLoading: false).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    let context = PersistenceController.shared.container.viewContext
+    let viewModel = OnboardingViewModel()
+    let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+    
+    do {
+        if try context.count(for: fetchRequest) == 0 {
+            Task {
+                try await viewModel.createDefaultCourses()
+            }
+        }
+    } catch {
+        print("Error checking or creating default courses: \(error)")
+    }
+    
+    do {
+        if try context.fetch(fetchRequest).count > 0 {
+            return TemplateCategoryView(isPresented: .constant(true), template: Template(id: UUID(), title: "Machine Learning", shareCode: "", authorName: "Simon", authorID: "123", likes: [], amountOfLikes: 0, tags: ["Machine Learning", "Coding", "Algorithms"], courses: [], amountOfSemesters: 0, amountOfCourses: 0), isLoading: false).environment(\.managedObjectContext, context)
+        } else {
+            return Text("No categories found")
+        }
+    } catch {
+        return Text("Error loading categories: \(error.localizedDescription)")
+    }
 }

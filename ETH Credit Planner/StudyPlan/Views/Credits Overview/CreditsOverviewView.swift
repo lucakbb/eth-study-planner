@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SimpleAnalytics
+import CoreData
 
 struct CreditsOverviewView: View {
     @Binding var isPresented: Bool
@@ -365,8 +366,30 @@ struct CreditsOverviewView: View {
 }
 
 #Preview {
-    Text("Test")
-        .sheet(isPresented: .constant(true)) {
-            CreditsOverviewView(isPresented: .constant(true)).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    let context = PersistenceController.shared.container.viewContext
+    let viewModel = OnboardingViewModel()
+    let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+    
+    do {
+        if try context.count(for: fetchRequest) == 0 {
+            Task {
+                try await viewModel.createDefaultCourses()
+            }
         }
+    } catch {
+        print("Error checking or creating default courses: \(error)")
+    }
+    
+    do {
+        if try context.fetch(fetchRequest).count > 0 {
+            return Text("Test")
+                .sheet(isPresented: .constant(true)) {
+                    CreditsOverviewView(isPresented: .constant(true)).environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
+                }
+        } else {
+            return Text("No categories found")
+        }
+    } catch {
+        return Text("Error loading categories: \(error.localizedDescription)")
+    }
 }

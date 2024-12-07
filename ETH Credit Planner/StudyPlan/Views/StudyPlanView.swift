@@ -389,5 +389,28 @@ extension Category {
 }
 
 #Preview {
-    StudyPlanView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    let context = PersistenceController.shared.container.viewContext
+    let viewModel = OnboardingViewModel()
+    let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+    
+    do {
+        if try context.count(for: fetchRequest) == 0 {
+            Task {
+                try await viewModel.createDefaultCourses()
+            }
+        }
+    } catch {
+        print("Error checking or creating default courses: \(error)")
+    }
+    
+    do {
+        if try context.fetch(fetchRequest).count > 0 {
+            return StudyPlanView().environment(\.managedObjectContext, context)
+        } else {
+            return Text("No categories found")
+        }
+    } catch {
+        return Text("Error loading categories: \(error.localizedDescription)")
+    }
 }
+

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SimpleAnalytics
+import CoreData
 
 struct AddCourseView: View {
     @StateObject var viewModel: AddCourseViewModel = AddCourseViewModel()
@@ -489,8 +490,31 @@ struct AddCourseView: View {
 }
 
 #Preview {
-    Text("")
-        .sheet(isPresented: .constant(true)) {
-            AddCourseView(isPresented: .constant(true)).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    let context = PersistenceController.shared.container.viewContext
+    let viewModel = OnboardingViewModel()
+    let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+    
+    do {
+        if try context.count(for: fetchRequest) == 0 {
+            Task {
+                try await viewModel.createDefaultCourses()
+            }
         }
+    } catch {
+        print("Error checking or creating default courses: \(error)")
+    }
+    
+    do {
+        if try context.fetch(fetchRequest).count > 0 {
+            return Text("")
+                .sheet(isPresented: .constant(true)) {
+                    AddCourseView(isPresented: .constant(true))
+                        .environment(\.managedObjectContext, context)
+                }
+        } else {
+            return Text("No categories found")
+        }
+    } catch {
+        return Text("Error loading categories: \(error.localizedDescription)")
+    }
 }

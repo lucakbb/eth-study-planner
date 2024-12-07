@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SimpleAnalytics
+import CoreData
 
 struct ImportCourseView: View {
     let viewContext = PersistenceController.shared.container.viewContext
@@ -417,5 +418,28 @@ struct TagsCloud: View {
 }
 
 #Preview {
-    ImportCourseView(course: nil, semester: nil)
+    let context = PersistenceController.shared.container.viewContext
+    let viewModel = OnboardingViewModel()
+    let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+    
+    do {
+        if try context.count(for: fetchRequest) == 0 {
+            Task {
+                try await viewModel.createDefaultCourses()
+            }
+        }
+    } catch {
+        print("Error checking or creating default courses: \(error)")
+    }
+    
+    do {
+        if try context.fetch(fetchRequest).count > 0 {
+            return ImportCourseView(course: nil, semester: nil)
+        } else {
+            return Text("No categories found")
+        }
+    } catch {
+        return Text("Error loading categories: \(error.localizedDescription)")
+    }
 }
+

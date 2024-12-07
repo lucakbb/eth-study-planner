@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct TemplateCategoryOverviewView: View {
     @Binding var courses: [[FirestoreCourse]]
@@ -96,5 +97,26 @@ struct TemplateCategoryOverviewView: View {
 }
 
 #Preview {
-    TemplateCategoryOverviewView(courses: .constant([]), category: Category(), isEditing: true)
+    let context = PersistenceController.shared.container.viewContext
+    let viewModel = OnboardingViewModel()
+    let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+    
+    do {
+        if try context.count(for: fetchRequest) == 0 {
+            Task {
+                try await viewModel.createDefaultCourses()
+            }
+        }
+    } catch {
+        print("Error checking or creating default courses: \(error)")
+    }
+    
+    if let category = try? context.fetch(fetchRequest).first {
+        return TemplateCategoryOverviewView(courses: .constant([]), category: category, isEditing: true)
+            .environment(\.managedObjectContext, context)
+    } else {
+        return Text("No categories found")
+    }
 }
+
+
