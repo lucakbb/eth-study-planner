@@ -30,7 +30,7 @@ If you'd like to explore tasks, feel free to browse the Issues page and pick som
 For minor changes, you’re welcome to submit a pull request directly without prior notification.
 
 ## Getting in touch
-If you have questions about getting setup or just want to say hi, write me on discord (@luca.bl) or use the contact form on [studyplanner.ch](studyplanner.ch).
+If you have questions about getting setup or just want to say hi, you are welcome to use the contact form on [studyplanner.ch](studyplanner.ch).
 
 ## Contributors
 The project was developed as part of the ‘Human Computer Interaction’ lecture at ETH Zurich in the autumn semester of 2024. ETH Study Planner is neither supported by ETH nor by VSETH, its a private initiative run by Students.
