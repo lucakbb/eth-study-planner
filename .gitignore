@@ -32,10 +32,6 @@
 **/*.xcarchive
 **/*.framework
 
-# Config Files
-**/GoogleService-Info.plist
-**/Secrets.plist
-
 # OS X
 .DS_Store
 .AppleDouble
@@ -44,3 +40,4 @@ Icon
 ._*
 .Spotlight-V100
 .Trashes
+.env
