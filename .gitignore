@@ -3,10 +3,16 @@
 ## User settings
 **/xcuserdata/
 **/DerivedData/
-**/*.xcworkspace/
 **/*.xcuserstate
 **/*.mode1v3
 **/*.pbxuser
+
+## Xcode
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
 
 ## Obj-C/Swift specific
 *.hmap
@@ -19,14 +25,12 @@
 # Swift Package Manager
 **/Packages/
 **/Package.pins
-**/Package.resolved
 
 ## Build artifacts
 **/Build/
 **/*.app
 **/*.xcarchive
 **/*.framework
-**/*.xcodeproj/project.xcworkspace/xcshareddata/
 
 # Config Files
 **/GoogleService-Info.plist
