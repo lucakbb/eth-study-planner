@@ -17,7 +17,7 @@ struct TemplateImportCourseView: View {
     ) var categories: FetchedResults<Category>
     
     @State var course: FirestoreCourse
-    @State var selectedSemester: Int
+    @State var selectedSemester: Int?
     
     @Binding var templateCourses: [[FirestoreCourse]]
     
@@ -39,7 +39,7 @@ struct TemplateImportCourseView: View {
                 }
                 .navigationTitle("Course Overview")
                 
-                if(findIndex(of: course, in: templateCourses) == nil) {
+                if(findIndex(of: course, in: templateCourses) == nil && selectedSemester != nil) {
                     Menu {
                         ForEach(filteredSemesters, id: \.self) { semester in
                             Button {
@@ -56,26 +56,49 @@ struct TemplateImportCourseView: View {
                     .padding(.bottom, 5)
                 }
                 
-                ZStack {
-                    if let index = findIndex(of: course, in: templateCourses) {
-                        Color(UIColor.secondarySystemGroupedBackground)
-                        Text("Already added to \(index + 1). Semester")
-                            .font(.system(size: 20, weight: .semibold))
-                    } else {
-                        Color("Color1")
-                        Text("Add to \(selectedSemester + 1). Semester")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.white)
+                if(findIndex(of: course, in: templateCourses) == nil && selectedSemester == nil) {
+                    Menu {
+                        ForEach(filteredSemesters, id: \.self) { semester in
+                            Button {
+                                selectedSemester = semester
+                            } label: {
+                                Text("\(semester + 1). Semester")
+                            }
+                        }
+                    } label: {
+                        ZStack {
+                            Color("Color1")
+                            Text("Select Semester")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
+                        .frame(height: 54)
+                        .cornerRadius(15)
+                        .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
+                        .padding(.bottom, 10)
                     }
-                }
-                .frame(height: 54)
-                .cornerRadius(15)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 10)
-                .onTapGesture {
-                    if(findIndex(of: course, in: templateCourses) == nil) {
-                        templateCourses[selectedSemester].append(course)
-                        dismiss()
+                } else {
+                    ZStack {
+                        if let index = findIndex(of: course, in: templateCourses) {
+                            Color(UIColor.secondarySystemGroupedBackground)
+                            Text("Already added to \(index + 1). Semester")
+                                .font(.system(size: 20, weight: .semibold))
+                        } else {
+                            Color("Color1")
+                            Text("Add to \(selectedSemester! + 1). Semester")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                    .frame(height: 54)
+                    .cornerRadius(15)
+                    .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
+                    .padding(.bottom, 10)
+                    .onTapGesture {
+                        if(findIndex(of: course, in: templateCourses) == nil) {
+                            templateCourses[selectedSemester!].append(course)
+                            dismiss()
+                        }
                     }
                 }
             }

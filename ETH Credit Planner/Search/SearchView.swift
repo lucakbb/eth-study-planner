@@ -41,32 +41,27 @@ struct SearchView: View {
             ScrollView {
                 VStack(alignment: .leading) {
                     searchFilter
-                        .padding(.horizontal, 16)
-                        .padding(.top, -5)
                     
                     if(bVersion && searchText.isEmpty && selectedCategory == nil && selectedSemester == nil) {
                         recommendationsView
                             .padding(.top, 16)
-                            .padding(.horizontal, 16)
                     }
                     
                     if(searchText.isEmpty && selectedCategory == nil && selectedSemester == nil) {
                         Text("All Courses")
                             .font(.system(size: 20, weight: .semibold))
-                            .padding(.horizontal, 16)
                             .padding(.top, 10)
                         Text("Course data taken from vvz.ethz.ch. No guarantee for accuracy and completeness.")
                             .font(.system(size: 17, weight: .semibold))
                             .foregroundStyle(Color(UIColor.systemGray2))
-                            .padding(.horizontal, 16)
                     }
                     
                     if(categories.count > 0) {
                         courseList
-                            .padding(.horizontal, 16)
                     }
                 }
             }
+            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             .navigationTitle("Search")
             .background(Color(UIColor.systemGroupedBackground))
             .searchable(text: $searchText)
@@ -407,7 +402,7 @@ struct SearchView: View {
                                             .padding(.vertical, 3)
                                             .padding(.horizontal, 9)
                                             .background {
-                                                Color("Color1")
+                                                Color(AppConstants.DefaultObjects.colors[course.category])
                                             }
                                             .cornerRadius(30)
                                         
@@ -417,7 +412,7 @@ struct SearchView: View {
                                             .padding(.vertical, 3)
                                             .padding(.horizontal, 9)
                                             .background {
-                                                Color("Color1")
+                                                Color(AppConstants.DefaultObjects.colors[course.category])
                                             }
                                             .cornerRadius(30)
                                     }

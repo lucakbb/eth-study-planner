@@ -16,8 +16,6 @@ struct RecommendationsSemesterView: View {
     @State var semesters: [[FirestoreCourse]] = []
     @State var isLoading: Bool = false
     
-    let colors = [Color("Color1"), Color("Color2"), Color("Color3"), Color("Color4"), Color("Color6"), Color("Color7"), Color("Color8"), Color("Color9"), Color("Color6"), Color("Color7"), Color("Color8"), Color("Color9")]
-    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -85,7 +83,7 @@ struct RecommendationsSemesterView: View {
                 }
             }
         }
-        .accentColor(Color("Color1"))
+        .accentColor(Color("Color3"))
     }
     
     var semesterList: some View {
@@ -105,7 +103,7 @@ struct RecommendationsSemesterView: View {
                                 HStack {
                                     Text("\((Int(recommendation.currentSemester) + index + 1))")
                                         .font(.system(size: 33, weight: .semibold, design: .rounded))
-                                        .foregroundStyle(colors[index])
+                                        .foregroundStyle(AppConstants.DefaultObjects.colors[index])
                                         .frame(width: 55, height: 55)
                                         .background {
                                             Color(UIColor.systemGroupedBackground)

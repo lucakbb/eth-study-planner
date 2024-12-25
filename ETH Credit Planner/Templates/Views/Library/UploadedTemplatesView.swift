@@ -34,11 +34,11 @@ struct UploadedTemplatesView: View {
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Published")
                                 .font(.system(size: 22, weight: .bold))
-                                .padding(.leading, 16)
+                                .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
                             
                             if(uploadedTemplates.count > 0) {
                                 templates
-                                    .padding(.horizontal, 16)
+                                    .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
                             } else {
                                 if(isLoading) {
                                     loadingTemplates
@@ -154,7 +154,7 @@ struct UploadedTemplatesView: View {
                         
                     }
                     .padding(.vertical, 12)
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
                 }
                 .cornerRadius(15)
                 .alert("Delete Template", isPresented: $isDeleteAlertShown) {
@@ -240,7 +240,7 @@ struct UploadedTemplatesView: View {
         }
         .frame(height: 54)
         .cornerRadius(15)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
     }
 }
 

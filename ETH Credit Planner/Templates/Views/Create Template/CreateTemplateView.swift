@@ -105,8 +105,6 @@ struct CreateTemplateCategoryView: View {
         fetchRequest: Category.fetchRequestWithCourses()
     ) var categories: FetchedResults<Category>
     
-    let colors = [Color("Color1"), Color("Color2"), Color("Color3"), Color("Color4"), Color("Color6"), Color("Color7"), Color("Color8"), Color("Color9")]
-    
     var body: some View {
         ScrollView {
             VStack {
@@ -122,7 +120,7 @@ struct CreateTemplateCategoryView: View {
                         TemplateCategoryOverviewView(courses: $viewModel.courses, category: category, isEditing: true)
                     } label: {
                         ZStack {
-                            colors[Int(category.id)]
+                            AppConstants.DefaultObjects.colors[Int(category.id)]
                             
                             HStack {
                                 Image(systemName: category.icon ?? "questionmark")
@@ -164,8 +162,6 @@ struct CreateTemplateCategoryView: View {
 struct CreateTemplateSemesterView: View {
     @ObservedObject var viewModel: CreateTemplateViewModel
     
-    let colors = [Color("Color1"), Color("Color2"), Color("Color3"), Color("Color4"), Color("Color6"), Color("Color7"), Color("Color8"), Color("Color9"), Color("Color6"), Color("Color7"), Color("Color8"), Color("Color9")]
-    
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack {
@@ -183,7 +179,7 @@ struct CreateTemplateSemesterView: View {
                             HStack {
                                 Text("\(index + 1)")
                                     .font(.system(size: 33, weight: .semibold, design: .rounded))
-                                    .foregroundStyle(colors[index])
+                                    .foregroundStyle(AppConstants.DefaultObjects.colors[index])
                                     .frame(width: 55, height: 55)
                                     .background {
                                         Color(UIColor.systemGroupedBackground)

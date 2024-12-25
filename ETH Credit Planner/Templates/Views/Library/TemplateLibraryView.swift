@@ -51,7 +51,7 @@ struct TemplateLibraryView: View {
                                     VStack(alignment: .leading, spacing: 5) {
                                         Text("Create Templates")
                                             .font(.system(size: 22, weight: .bold))
-                                            .padding(.leading, 16)
+                                            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
                                         
                                         NavigationLink {
                                             UploadedTemplatesView(isUploadedTemplatesShown: $isUploadedTemplatesShown)
@@ -86,7 +86,7 @@ struct TemplateLibraryView: View {
                                             }
                                             .frame(height: 54)
                                             .cornerRadius(15)
-                                            .padding(.horizontal, 16)
+                                            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
                                         }
                                     }
                                     .padding(.top, 5)
@@ -94,7 +94,11 @@ struct TemplateLibraryView: View {
                                 
                                 topics
                                 
-                                semesters
+                                if(UIDevice.current.userInterfaceIdiom == .phone) {
+                                    semesters
+                                } else {
+                                    catalystSemesters
+                                }
                                 
                                 mostLikes
                                     .padding(.bottom, 80)
@@ -120,7 +124,7 @@ struct TemplateLibraryView: View {
                                     } label: {
                                         TemplatePreviewCard(template: template)
                                     }
-                                    .padding(.horizontal, 16)
+                                    .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
                                 }
                             }
                         }
@@ -167,7 +171,7 @@ struct TemplateLibraryView: View {
         VStack(alignment: .leading, spacing: 5) {
             Text("Topics")
                 .font(.system(size: 22, weight: .bold))
-                .padding(.leading, 16)
+                .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 7) {
@@ -190,7 +194,7 @@ struct TemplateLibraryView: View {
                                         .frame(height: 35)
                                         .background(Color(UIColor.secondarySystemGroupedBackground))
                                         .cornerRadius(30)
-                                        .padding(.leading, (index == 0) ? 16 : 0)
+                                        .padding(.leading, (index == 0) ? (UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20) : 0)
                                     }
                                 }
                                 
@@ -208,7 +212,7 @@ struct TemplateLibraryView: View {
         VStack(alignment: .leading, spacing: 5) {
             Text("Amount of Semesters")
                 .font(.system(size: 22, weight: .bold))
-                .padding(.leading, 16)
+                .padding(.leading, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             
             ZStack {
                 Color(UIColor.secondarySystemGroupedBackground)
@@ -247,7 +251,51 @@ struct TemplateLibraryView: View {
                 .padding(.vertical, 16)
             }
             .cornerRadius(15)
-            .padding(.horizontal, 16)
+            .padding(.leading, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
+        }
+    }
+    
+    var catalystSemesters: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text("Amount of Semesters")
+                .font(.system(size: 22, weight: .bold))
+                .padding(.leading, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
+            
+            HStack(spacing: 10) {
+                ForEach(Array(AppConstants.TemplateTopics.semesters.enumerated()), id: \.element) { index, topic in
+                    ZStack {
+                        Color(UIColor.secondarySystemGroupedBackground)
+                        
+                        NavigationLink {
+                            TopicOverviewView(topic: topic)
+                        } label: {
+                            VStack {
+                                ZStack {
+                                    Circle()
+                                        .frame(width: 65, height: 65)
+                                        .foregroundStyle(topic.color)
+                                    if(topic.title.prefix(1) == "8") {
+                                        Text("8+")
+                                            .foregroundStyle(.white)
+                                            .font(.system(size: 30, weight: .semibold, design: .rounded))
+                                    } else {
+                                        Text(topic.title.prefix(1))
+                                            .foregroundStyle(.white)
+                                            .font(.system(size: 30, weight: .semibold, design: .rounded))
+                                    }
+                                }
+                                
+                                Text("Semesters")
+                                    .foregroundStyle(Color(UIColor.label))
+                                    .font(.system(size: 17, weight: .semibold))
+                            }
+                        }
+                        .padding(.vertical, 16)
+                    }
+                    .cornerRadius(15)
+                }
+            }
+            .padding(.horizontal, 20)
         }
     }
 
@@ -256,7 +304,7 @@ struct TemplateLibraryView: View {
         VStack(alignment: .leading, spacing: 5) {
             Text("More")
                 .font(.system(size: 22, weight: .bold))
-                .padding(.leading, 16)
+                .padding(.leading, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 7) {
@@ -279,7 +327,7 @@ struct TemplateLibraryView: View {
                                         .frame(height: 35)
                                         .background(Color(UIColor.secondarySystemGroupedBackground))
                                         .cornerRadius(30)
-                                        .padding(.leading, (index == 0) ? 16 : 0)
+                                        .padding(.leading, (index == 0) ? (UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20) : 0)
                                     }
                                 }
                                 
@@ -296,15 +344,17 @@ struct TemplateLibraryView: View {
         VStack(alignment: .leading, spacing: 5) {
             Text("Most Liked Templates")
                 .font(.system(size: 22, weight: .bold))
-                .padding(.leading, 16)
+                .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             
             VStack(spacing: 10) {
                 if(!isLoading) {
-                    ForEach($mostLikedTemplates, id: \.self) { $template in
-                        NavigationLink {
-                            TemplateOverviewView(template: $template, color: Color("Color7"))
-                        } label: {
-                            TemplatePreviewCard(template: template, color: Color("Color7"))
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: UIDevice.current.userInterfaceIdiom == .phone ? 1 : 2), spacing: 10) {
+                        ForEach($mostLikedTemplates, id: \.self) { $template in
+                            NavigationLink {
+                                TemplateOverviewView(template: $template, color: Color("Color7"))
+                            } label: {
+                                TemplatePreviewCard(template: template, color: Color("Color7"))
+                            }
                         }
                     }
                 } else {
@@ -313,7 +363,7 @@ struct TemplateLibraryView: View {
                     }
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.leading, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             .onAppear {
                 if(mostLikedTemplates.count == 0) {
                     Task {

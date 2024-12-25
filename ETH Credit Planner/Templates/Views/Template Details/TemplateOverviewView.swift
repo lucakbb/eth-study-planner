@@ -92,7 +92,7 @@ struct TemplateOverviewView: View {
                 }
             }
             .navigationTitle("\(template.authorName)'s Study Plan")
-            .padding(.horizontal, 16)
+            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             .background(Color(UIColor.systemGroupedBackground))
             .sheet(isPresented: $isSemesterPopoverShown) {
                 TemplateSemesterView(isPresented: $isSemesterPopoverShown, template: template)
@@ -143,7 +143,7 @@ struct TemplateOverviewView: View {
                 }
             }
             .padding(.vertical, 12)
-            .padding(.horizontal, 16)
+            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
         }
         .cornerRadius(15)
     }

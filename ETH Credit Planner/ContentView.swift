@@ -7,43 +7,136 @@
 
 import SwiftUI
 import CoreData
+import SimpleAnalytics
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("oldUser") private var oldUser = false
     @AppStorage("BVersionRecommendations") private var bVersion = false
     @AppStorage("recommendationsEnabled") private var recommendationsEnabled = true
+
+    @State private var selectedMenu: MenuItem? = .semesters
+    @State private var isCreditOverviewShown = false
+    @State private var isChangelogShown = false
     
     var body: some View {
-        if(oldUser) {
-            TabView {
-                StudyPlanView()
-                    .tabItem {
-                        Label("Study Plan", systemImage: "doc.text")
+        if(oldUser || CloudKitPreferencesManager.shared.getOldUser()) {
+            if UIDevice.current.userInterfaceIdiom == .phone {
+                TabView {
+                    StudyPlanView()
+                        .tabItem {
+                            Label("Study Plan", systemImage: "doc.text")
+                        }
+                    
+                    SearchView()
+                        .tabItem {
+                            Label("Search", systemImage: "magnifyingglass")
+                        }
+                    
+                    if(!bVersion) {
+                        if(recommendationsEnabled) {
+                            RecommendationsView()
+                                .tabItem {
+                                    Label("Recommendations", systemImage: "star.fill")
+                                }
+                        }
                     }
-                
-                SearchView()
-                    .tabItem {
-                        Label("Search", systemImage: "magnifyingglass")
-                    }
-                
-                if(!bVersion) {
-                    if(recommendationsEnabled) {
-                        RecommendationsView()
-                            .tabItem {
-                                Label("Recommendations", systemImage: "star.fill")
-                            }
+                    
+                    TemplateLibraryView()
+                        .tabItem {
+                            Label("Templates", systemImage: "rectangle.stack")
+                        }
+                }
+                .onAppear {
+                    if(UserDefaults.standard.string(forKey: "currentVersion") != "1.1") {
+                        isChangelogShown = true
                     }
                 }
-                
-                TemplateLibraryView()
-                    .tabItem {
-                        Label("Templates", systemImage: "rectangle.stack")
+                .sheet(isPresented: $isChangelogShown) {
+                    ChangelogView(isPresented: $isChangelogShown)
+                }
+            } else if UIDevice.current.userInterfaceIdiom == .pad {
+                NavigationSplitView {
+                    VStack {
+                        List(selection: $selectedMenu) {
+                            Section(header: Text("Study Plan")) {
+                                NavigationLink(value: MenuItem.semesters) {
+                                    Label("Semesters", systemImage: "calendar")
+                                }
+                                NavigationLink(value: MenuItem.categories) {
+                                    Label("Categories", systemImage: "tray.full.fill")
+                                }
+                            }
+                            
+                            Section(header: Text("Explore")) {
+                                NavigationLink(value: MenuItem.search) {
+                                    Label("Search", systemImage: "magnifyingglass")
+                                }
+                                NavigationLink(value: MenuItem.recommendations) {
+                                    Label("Recommendations", systemImage: "star.fill")
+                                }
+                                NavigationLink(value: MenuItem.templates) {
+                                    Label("Templates", systemImage: "rectangle.stack.fill")
+                                }
+                            }
+                            
+                            Section(header: Text("More")) {
+                                NavigationLink(value: MenuItem.settings) {
+                                    Label("Settings", systemImage: "gear")
+                                }
+                            }
+                        }
+                        .listStyle(SidebarListStyle())
+                        .navigationTitle("Study Planner")
+                        .scrollContentBackground(.hidden)
+                        .background(Color(UIColor.systemGroupedBackground))
                     }
+                    .background(Color(UIColor.systemGroupedBackground))
+                } detail: {
+                    if let selectedMenu = selectedMenu {
+                        selectedMenu.view
+                    }
+                }
+                .onAppear {
+                    if(UserDefaults.standard.string(forKey: "currentVersion") != "1.1") {
+                        isChangelogShown = true
+                    }
+                }
+                .sheet(isPresented: $isChangelogShown) {
+                    ChangelogView(isPresented: $isChangelogShown)
+                }
             }
-            .accentColor(Color("Color3"))
         } else {
             OnboardingView()
+        }
+    }
+}
+
+enum MenuItem: String, CaseIterable, Hashable, Identifiable {
+    case semesters
+    case categories
+    case search
+    case recommendations
+    case templates
+    case settings
+    
+    var id: String { rawValue }
+    
+    @ViewBuilder
+    var view: some View {
+        switch self {
+        case .semesters:
+            SemesterCatalystView()
+        case .categories:
+            CategoryCatalystView()
+        case .search:
+            SearchView()
+        case .recommendations:
+            RecommendationsView()
+        case .templates:
+            TemplateLibraryView()
+        case .settings:
+            SettingsView()
         }
     }
 }
@@ -71,5 +164,40 @@ struct ContentView: View {
         }
     } catch {
         return Text("Error loading categories: \(error.localizedDescription)")
+    }
+}
+
+struct SemesterCatalystView: View {
+    @State var isCreditOverviewShown = false
+    
+    var body: some View {
+        NavigationStack {
+            SemesterView(isCreditOverviewShown: $isCreditOverviewShown)
+                .padding(.horizontal, 16)
+                .background(Color(UIColor.systemGroupedBackground))
+                .navigationTitle("Semesters")
+                .sheet(isPresented: $isCreditOverviewShown) {
+                    CreditsOverviewView(isPresented: $isCreditOverviewShown)
+                }
+                .onAppear {
+                    PersistenceController.shared.cleanUpDuplicates()
+                }
+        }
+    }
+}
+
+struct CategoryCatalystView: View {
+    @State var isCreditOverviewShown = false
+    
+    var body: some View {
+        NavigationStack {
+            CategoryView(isCreditOverviewShown: $isCreditOverviewShown)
+                .padding(.horizontal, 16)
+                .background(Color(UIColor.systemGroupedBackground))
+                .navigationTitle("Categories")
+                .sheet(isPresented: $isCreditOverviewShown) {
+                    CreditsOverviewView(isPresented: $isCreditOverviewShown)
+                }
+        }
     }
 }

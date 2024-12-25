@@ -13,10 +13,22 @@ class SettingsModel: ObservableObject {
     let viewContext = PersistenceController.shared.container.viewContext
     
     func writeReview() {
+        #if os(iOS)
         let urlStr = "https://apps.apple.com/app/eth-credit-planner/id6737737758?action=write-review"
-        guard let url = URL(string: urlStr), UIApplication.shared.canOpenURL(url) else { return }
+        guard
+            let url = URL(string: urlStr),
+            UIApplication.shared.canOpenURL(url)
+        else { return }
 
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
+
+        #elseif os(macOS)
+        let urlStr = "macappstore://itunes.apple.com/app/id6737737758?action=write-review"
+        guard let url = URL(string: urlStr) else { return }
+
+        NSWorkspace.shared.open(url)
+        
+        #endif
     }
     
     func getVersionInformation() -> String {
@@ -61,15 +73,6 @@ extension Bundle {
     
     var buildNumber: String {
         return infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
-    }
-}
-
-extension UIApplication {
-    var firstKeyWindow: UIWindow? {
-        return UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .filter { $0.activationState == .foregroundActive }
-            .first?.keyWindow
     }
 }
 

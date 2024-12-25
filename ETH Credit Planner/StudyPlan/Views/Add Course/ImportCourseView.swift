@@ -88,7 +88,8 @@ struct ImportCourseView: View {
                     }
                     .navigationTitle("Course Overview")
                     
-                    if(fetchedCourse.count == 0) {
+                    // Show Button to change semester only if a semester has already been selected
+                    if(fetchedCourse.count == 0 && selectedSemester != nil) {
                         Menu {
                             ForEach(filteredSemesters, id: \.self) { semester in
                                 Button {
@@ -105,69 +106,90 @@ struct ImportCourseView: View {
                         .padding(.bottom, 5)
                     }
                     
-                    ZStack {
-                        if(fetchedCourse.count > 0) {
-                            Color(UIColor.secondarySystemGroupedBackground)
-                            Text("Already added to \(((fetchedCourse[0].semester?.number ?? 0) + 1)). Semester")
-                                .font(.system(size: 20, weight: .semibold))
-                        } else {
-                            Color("Color1")
-                            Text("Add to \((selectedSemester?.number ?? -1) + 1). Semester")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundStyle(.white)
-                        }
-                    }
-                    .frame(height: 54)
-                    .cornerRadius(15)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 10)
-                    .onTapGesture {
-                        if(fetchedCourse.count == 0) {
-                            if let selectedCourse = course, let semester = selectedSemester {
-                                SimpleAnalytics.shared.track(event: "added course")
-                                
-                                viewModel.importCourse(firestoreCourse: selectedCourse, semester: semester, category: categories[course?.category ?? 0])
-                                dismiss()
-                            }
-                        }
-                    }
-                    .onAppear {
-                        // Set Default Semester
-                        if let semester = selectedSemester {
-                            
-                            let isHSSemester = (semester.number % 2 == 0)
-                            if let semestersArray = course?.semester {
-                                if(isHSSemester) {
-                                    self.selectedSemester = semestersArray.contains{ $0 % 2 == 1 } ? semester : semesters[1]
-                                } else {
-                                    self.selectedSemester = semestersArray.contains{ $0 % 2 == 0 } ? semester : semesters[0]
+                    if(fetchedCourse.count == 0 && selectedSemester == nil) {
+                        Menu {
+                            ForEach(filteredSemesters, id: \.self) { semester in
+                                Button {
+                                    selectedSemester = semester
+                                } label: {
+                                    Text("\(semester.number + 1). Semester")
                                 }
-                            } else {
-                                self.selectedSemester = semester
                             }
-                            
+                        } label: {
+                            ZStack {
+                                Color("Color1")
+                                Text("Select Semester")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundStyle(.white)
+                            }
+                            .frame(height: 54)
+                            .cornerRadius(15)
+                            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
+                            .padding(.bottom, 10)
+                        }
+                    } else {
+                        ZStack {
+                            if(fetchedCourse.count > 0) {
+                                Color(UIColor.secondarySystemGroupedBackground)
+                                Text("Already added to \(((fetchedCourse[0].semester?.number ?? 0) + 1)). Semester")
+                                    .font(.system(size: 20, weight: .semibold))
+                            } else {
+                                Color("Color1")
+                                Text("Add to \((selectedSemester?.number ?? -1) + 1). Semester")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .frame(height: 54)
+                        .cornerRadius(15)
+                        .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
+                        .padding(.bottom, 10)
+                        .onTapGesture {
+                            if(fetchedCourse.count == 0 && selectedSemester != nil) {
+                                if let selectedCourse = course, let semester = selectedSemester {
+                                    SimpleAnalytics.shared.track(event: "added course")
+                                    
+                                    viewModel.importCourse(firestoreCourse: selectedCourse, semester: semester, category: categories[course?.category ?? 0])
+                                    dismiss()
+                                }
+                            }
+                        }
+                    }
+                }
+                .onAppear {
+                    // Check if course is available in selected Semester, if not selectedSemester = nil
+                    if let semester = selectedSemester {
+                        
+                        let isHSSemester = (semester.number % 2 == 0)
+                        if let semestersArray = course?.semester {
+                            if(isHSSemester) {
+                                self.selectedSemester = semestersArray.contains{ $0 % 2 == 1 } ? semester : nil
+                            } else {
+                                self.selectedSemester = semestersArray.contains{ $0 % 2 == 0 } ? semester : nil
+                            }
                         } else {
-                            selectedSemester = (course?.semester.first ?? 0) % 2 == 1 ? semesters[0] : semesters[1]
+                            self.selectedSemester = semester
                         }
                         
-                        // Set the Semesters, the course can be added to
-                        if let semestersArray = course?.semester {
-                            let hasEven = semestersArray.contains { $0 % 2 == 0 }
-                            let hasOdd = semestersArray.contains { $0 % 2 == 1 }
-                            
-                            if hasEven && hasOdd {
-                                // HS and FS
-                                filteredSemesters = Array(semesters)
-                            } else if hasEven {
-                                // Only HS course
-                                filteredSemesters = semesters.filter { $0.number % 2 == 1 }
-                            } else if hasOdd {
-                                // Only FS course
-                                filteredSemesters = semesters.filter { $0.number % 2 == 0 }
-                            } else {
-                                // Fallback
-                                filteredSemesters = []
-                            }
+                    }
+                    
+                    // Set the Semesters, the course can be added to
+                    if let semestersArray = course?.semester {
+                        let hasEven = semestersArray.contains { $0 % 2 == 0 }
+                        let hasOdd = semestersArray.contains { $0 % 2 == 1 }
+                        
+                        if hasEven && hasOdd {
+                            // HS and FS
+                            filteredSemesters = Array(semesters)
+                        } else if hasEven {
+                            // Only HS course
+                            filteredSemesters = semesters.filter { $0.number % 2 == 1 }
+                        } else if hasOdd {
+                            // Only FS course
+                            filteredSemesters = semesters.filter { $0.number % 2 == 0 }
+                        } else {
+                            // Fallback
+                            filteredSemesters = []
                         }
                     }
                 }

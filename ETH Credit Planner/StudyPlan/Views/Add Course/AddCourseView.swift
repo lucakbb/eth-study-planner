@@ -19,6 +19,12 @@ struct AddCourseView: View {
         sortDescriptors: [NSSortDescriptor(keyPath: \Category.id, ascending: true)]
     ) var categories: FetchedResults<Category>
     
+    @FetchRequest(
+        entity: Course.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Course.id, ascending: true)],
+        predicate: NSPredicate(format: "isPassed == true")
+    ) var passedCourses: FetchedResults<Course>
+    
     @Binding var isPresented: Bool
     @State var searchText: String = ""
     
@@ -47,22 +53,20 @@ struct AddCourseView: View {
             ScrollView {
                 VStack {
                     searchFilter
-                        .padding(.horizontal, 16)
-                        .padding(.top, -5)
 
                     if searchText.isEmpty {
                         recommendationsView
-                            .padding(.horizontal, 16)
                             .padding(.top, 15)
                     }
                     
                     allCourses
                         .padding(.top, searchText.isEmpty ? 15 : 0)
-                        .padding(.horizontal, 16)
                 }
             }
             .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("Add Course")
+            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
+            .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $isAddCustomCourseViewShown) {
                 AddCustomCourseView(isPresented: $isAddCustomCourseViewShown, semester: semester)
             }
@@ -73,7 +77,7 @@ struct AddCourseView: View {
                         isPresented = false
                     }
             }
-            .searchable(text: $searchText)
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
             .onChange(of: searchText) {
                 filteredCourses = courses
                 
@@ -90,6 +94,17 @@ struct AddCourseView: View {
                }
                 
                 filteredCourses.sort { $0.category < $1.category }
+                filteredCourses = filteredCourses.filter { filteredCourse in
+                    let hasMatchingPrefix = passedCourses.contains { course in
+                        return course.name == filteredCourse.name
+                    }
+                    
+                    if(hasMatchingPrefix) {
+                        print(filteredCourse.name)
+                    }
+                    
+                    return !hasMatchingPrefix
+                }
             }
             .onAppear {
                 SimpleAnalytics.shared.track(path: ["study-plan", "add-course"])
@@ -104,6 +119,17 @@ struct AddCourseView: View {
                         filteredCourses = courses
                         
                         filteredCourses.sort { $0.category < $1.category }
+                        filteredCourses = filteredCourses.filter { filteredCourse in
+                            let hasMatchingPrefix = passedCourses.contains { course in
+                                return course.name == filteredCourse.name
+                            }
+                            
+                            if(hasMatchingPrefix) {
+                                print(filteredCourse.name)
+                            }
+                            
+                            return !hasMatchingPrefix
+                        }
                         
                         if let category = selectedCategory {
                             filteredCourses = courses.filter { $0.category == category.id }
@@ -139,6 +165,17 @@ struct AddCourseView: View {
                            }
                             
                             filteredCourses.sort { $0.category < $1.category }
+                            filteredCourses = filteredCourses.filter { filteredCourse in
+                                let hasMatchingPrefix = passedCourses.contains { course in
+                                    return course.name == filteredCourse.name
+                                }
+                                
+                                if(hasMatchingPrefix) {
+                                    print(filteredCourse.name)
+                                }
+                                
+                                return !hasMatchingPrefix
+                            }
                         } label: {
                             Text(category.name ?? "")
                         }
@@ -157,6 +194,17 @@ struct AddCourseView: View {
                        }
                         
                         filteredCourses.sort { $0.category < $1.category }
+                        filteredCourses = filteredCourses.filter { filteredCourse in
+                            let hasMatchingPrefix = passedCourses.contains { course in
+                                return course.name == filteredCourse.name
+                            }
+                            
+                            if(hasMatchingPrefix) {
+                                print(filteredCourse.name)
+                            }
+                            
+                            return !hasMatchingPrefix
+                        }
                     } label: {
                         Text("All Courses")
                     }
@@ -200,6 +248,17 @@ struct AddCourseView: View {
                                 }
                                 
                                 filteredCourses.sort { $0.category < $1.category }
+                                filteredCourses = filteredCourses.filter { filteredCourse in
+                                    let hasMatchingPrefix = passedCourses.contains { course in
+                                        return course.name == filteredCourse.name
+                                    }
+                                    
+                                    if(hasMatchingPrefix) {
+                                        print(filteredCourse.name)
+                                    }
+                                    
+                                    return !hasMatchingPrefix
+                                }
                                 
                                 // reset semester
                                 self.semester = nil
@@ -288,7 +347,7 @@ struct AddCourseView: View {
                                                     .padding(.vertical, 3)
                                                     .padding(.horizontal, 9)
                                                     .background {
-                                                        Color("Color1")
+                                                        Color(AppConstants.DefaultObjects.colors[course.category])
                                                     }
                                                     .cornerRadius(30)
                                                 
@@ -298,7 +357,7 @@ struct AddCourseView: View {
                                                     .padding(.vertical, 3)
                                                     .padding(.horizontal, 9)
                                                     .background {
-                                                        Color("Color1")
+                                                        Color(AppConstants.DefaultObjects.colors[course.category])
                                                     }
                                                     .cornerRadius(30)
                                             }
@@ -441,7 +500,7 @@ struct AddCourseView: View {
                                                 .padding(.vertical, 3)
                                                 .padding(.horizontal, 9)
                                                 .background {
-                                                    Color("Color1")
+                                                    Color(AppConstants.DefaultObjects.colors[course.category])
                                                 }
                                                 .cornerRadius(30)
                                             
@@ -451,7 +510,7 @@ struct AddCourseView: View {
                                                 .padding(.vertical, 3)
                                                 .padding(.horizontal, 9)
                                                 .background {
-                                                    Color("Color1")
+                                                    Color(AppConstants.DefaultObjects.colors[course.category])
                                                 }
                                                 .cornerRadius(30)
                                         }

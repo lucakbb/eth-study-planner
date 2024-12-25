@@ -20,6 +20,7 @@ struct OnboardingView: View {
     @State var isAlertShown = false
     @State var isNameAlertShown = false
     @State var isInterestsAlertShown = false
+    @State var isiCloudAlertShown = false
     
     @State var isLoading: Bool = false
     
@@ -31,107 +32,175 @@ struct OnboardingView: View {
                 welcome
                     .background(Color(UIColor.systemGroupedBackground))
             case 1:
-                nameView
+                importData
             case 2:
-                interests
+                nameView
             case 3:
+                interests
+            case 4:
                 semester
             default:
                 OnboardingCoursesView(viewModel: viewModel)
             }
             
-            ZStack {
-                Color("Color1")
-                
-                if(!isLoading) {
-                    Text("Continue")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.white)
-                } else {
-                    HStack {
-                        ProgressView()
-                        Text("Loading")
+            if(progress != 1) {
+                ZStack {
+                    Color("Color1")
+                    
+                    if(!isLoading) {
+                        Text("Continue")
                             .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(.white)
-                    }
-                }
-            }
-            .frame(height: 54)
-            .cornerRadius(15)
-            .padding(.horizontal, 16)
-            .onTapGesture {
-                Task {
-                    if(progress == 3) {
-                        if(isLoading) {
-                            return
-                        }
-                        
-                        do {
-                            isLoading = true
-                            try await viewModel.createDefaultCourses()
-                            isLoading = false
-                        } catch {
-                            isAlertShown = true
-                            return
-                        }
-                    }
-                    
-                    if(progress == 1 && (name.isEmpty || name.count > 30)) {
-                        isNameAlertShown = true
-                        return
-                    }
-                    
-                    if(progress == 2 && selectedInterests.count <= 2) {
-                        isInterestsAlertShown = true
-                        return
-                    }
-                    
-                    if(progress <= 3) {
-                        progress += 1
                     } else {
-                        SimpleAnalytics.shared.track(event: "finished onboarding")
-                        
-                        UserDefaults.standard.setValue(name, forKey: "userName")
-                        UserDefaults.standard.setValue(true, forKey: "oldUser")
-                        
-                        let interestsManager = InterestsManager()
-                        interestsManager.saveInterests(Interests(titles: Array(selectedInterests)))
+                        HStack {
+                            ProgressView()
+                            Text("Loading")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
                     }
                 }
-            }
-            .padding(.bottom, 10)
-            .alert("Error", isPresented: $isAlertShown) {
-                Button {
-                    isAlertShown = false
-                } label: {
-                    Text("Ok")
+                .frame(height: 54)
+                .cornerRadius(15)
+                .padding(.horizontal, 16)
+                .onTapGesture {
+                    Task {
+                        if(progress == 3) {
+                            if(isLoading) {
+                                return
+                            }
+                            
+                            do {
+                                isLoading = true
+                                try await viewModel.createDefaultCourses()
+                                isLoading = false
+                            } catch {
+                                isAlertShown = true
+                                return
+                            }
+                        }
+                        
+                        if(progress == 1 && (name.isEmpty || name.count > 30)) {
+                            isNameAlertShown = true
+                            return
+                        }
+                        
+                        if(progress == 2 && selectedInterests.count <= 2) {
+                            isInterestsAlertShown = true
+                            return
+                        }
+                        
+                        if(progress <= 3) {
+                            progress += 1
+                        } else {
+                            SimpleAnalytics.shared.track(event: "finished onboarding")
+                            
+                            CloudKitPreferencesManager.shared.setUserName(name)
+                            CloudKitPreferencesManager.shared.setOldUser(true)
+                            CloudKitPreferencesManager.shared.setInterests(Interests(titles: Array(selectedInterests)))
+                            
+                            UserDefaults.standard.setValue("1.1", forKey: "currentVersion")
+                        }
+                    }
                 }
-            } message: {
-                Text("Please check your connection and try again.")
-            }
-            .alert("Name", isPresented: $isNameAlertShown) {
-                Button {
-                    isNameAlertShown = false
-                } label: {
-                    Text("Ok")
+                .padding(.bottom, 10)
+                .alert("Error", isPresented: $isAlertShown) {
+                    Button {
+                        isAlertShown = false
+                    } label: {
+                        Text("Ok")
+                    }
+                } message: {
+                    Text("Please check your connection and try again.")
                 }
-            } message: {
-                Text("Please choose a name between 1 and 30 characters.")
-            }
-            .alert("Interests", isPresented: $isInterestsAlertShown) {
-                Button {
-                    isInterestsAlertShown = false
-                } label: {
-                    Text("Ok")
+                .alert("Name", isPresented: $isNameAlertShown) {
+                    Button {
+                        isNameAlertShown = false
+                    } label: {
+                        Text("Ok")
+                    }
+                } message: {
+                    Text("Please choose a name between 1 and 30 characters.")
                 }
-            } message: {
-                Text("Please choose at least 3 interests.")
+                .alert("Interests", isPresented: $isInterestsAlertShown) {
+                    Button {
+                        isInterestsAlertShown = false
+                    } label: {
+                        Text("Ok")
+                    }
+                } message: {
+                    Text("Please choose at least 3 interests.")
+                }
             }
         }
         .onAppear {
             SimpleAnalytics.shared.track(path: ["onboarding"])
         }
         .background(Color(UIColor.systemGroupedBackground))
+    }
+    
+    var importData: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    
+                    Text("Would you like to start fresh or import existing data from another device via iCloud?")
+                        .multilineTextAlignment(.leading)
+                        .font(.system(size: 20, weight: .semibold))
+                    
+                    Spacer()
+                    
+                    ZStack {
+                        Color("Color1")
+                        
+                        VStack(spacing: 25) {
+                            VStack(spacing: 5) {
+                                Image(systemName: "arrow.right.circle.fill")
+                                    .font(.system(size: 30, weight: .semibold))
+                                Text("Start fresh")
+                                    .font(.system(size: 20, weight: .semibold))
+                            }
+                            .padding(.top, 25)
+                            .onTapGesture {
+                                progress += 1
+                            }
+                            
+                            Divider()
+                                .background(Color.white)
+                            
+                            VStack(spacing: 5) {
+                                Image(systemName: "cloud.fill")
+                                    .font(.system(size: 30, weight: .semibold))
+                                Text("Use iCloud")
+                                    .font(.system(size: 20, weight: .semibold))
+                            }
+                            .padding(.bottom, 25)
+                            .onTapGesture {
+                                isiCloudAlertShown = true
+                            }
+                            .alert("Error", isPresented: $isiCloudAlertShown) {
+                                Button {
+                                    isiCloudAlertShown = false
+                                } label: {
+                                    Text("Ok")
+                                }
+                            } message: {
+                                Text("To view and edit data from another device, please follow these steps:\n\n1. On the other device whose data you wish to sync, open the ETH Study Planner settings and enable the \"iCloud Sync\" option. Note that it may take a few moments for the data to upload.\n\n2. Restart the app on this device and wait briefly.\n\nIf these steps do not work, ensure that you are signed in with the same Apple ID on both devices and that you have sufficient iCloud storage space.\n\nImportant: Do not proceed with \"Start Fresh\" onboarding on this device, as doing so may cause synchronization issues.\n\nIf you have any questions or encounter any problems, please contact us at studyplanner.ch.")
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                    .cornerRadius(10)
+                    .padding(.top, -5)
+                    .padding(.bottom, 30)
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
+                .navigationTitle("Import Data")
+            }
+            .background(Color(UIColor.systemGroupedBackground))
+        }
     }
     
     var semester: some View {

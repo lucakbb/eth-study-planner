@@ -44,7 +44,6 @@ struct TemplateAddCourseView: View {
                 VStack {
                     searchFilter
                         .padding(.horizontal, 16)
-                        .padding(.top, -5)
                     
                     if(categories.count > 0) {
                         allCourses
@@ -62,7 +61,7 @@ struct TemplateAddCourseView: View {
                         isPresented = false
                     }
             }
-            .searchable(text: $searchText)
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
             .onChange(of: searchText) {
                 filteredCourses = courses
                 
@@ -239,16 +238,8 @@ struct TemplateAddCourseView: View {
     var allCourses: some View {
         VStack(alignment: .leading) {
             if searchText.isEmpty {
-                HStack {
-                    Text("All Courses")
-                        .font(.system(size: 20, weight: .semibold))
-                    
-                    Spacer()
-                    
-                    Text("Add Custom Course")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(Color("Color3"))
-                }
+                Text("All Courses")
+                    .font(.system(size: 20, weight: .semibold))
                 Text("Course data taken from vvz.ethz.ch. No guarantee for accuracy and completeness.")
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundStyle(Color(UIColor.systemGray2))
@@ -263,11 +254,11 @@ struct TemplateAddCourseView: View {
                             if(wantToImportToHS) {
                                 let canBeTakenInHs = course.semester.contains { $0 % 2 == 1}
                                 
-                                TemplateImportCourseView(course: course, selectedSemester: canBeTakenInHs ? semester : 1, templateCourses: $templateCourses)
+                                TemplateImportCourseView(course: course, selectedSemester: canBeTakenInHs ? semester : nil, templateCourses: $templateCourses)
                             } else {
                                 let canBeTakenInFs = course.semester.contains { $0 % 2 == 0}
                                 
-                                TemplateImportCourseView(course: course, selectedSemester: canBeTakenInFs ? semester : 0, templateCourses: $templateCourses)
+                                TemplateImportCourseView(course: course, selectedSemester: canBeTakenInFs ? semester : nil, templateCourses: $templateCourses)
                             }
                         } label: {
                             ZStack {
@@ -288,7 +279,7 @@ struct TemplateAddCourseView: View {
                                                 .padding(.vertical, 3)
                                                 .padding(.horizontal, 9)
                                                 .background {
-                                                    Color("Color1")
+                                                    Color(AppConstants.DefaultObjects.colors[course.category])
                                                 }
                                                 .cornerRadius(30)
                                             
@@ -298,7 +289,7 @@ struct TemplateAddCourseView: View {
                                                 .padding(.vertical, 3)
                                                 .padding(.horizontal, 9)
                                                 .background {
-                                                    Color("Color1")
+                                                    Color(AppConstants.DefaultObjects.colors[course.category])
                                                 }
                                                 .cornerRadius(30)
                                         }

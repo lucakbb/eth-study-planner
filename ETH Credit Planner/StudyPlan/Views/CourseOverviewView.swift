@@ -55,7 +55,7 @@ struct CourseOverviewView: View {
                     }
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
         }
         .background(Color(UIColor.systemGroupedBackground))
         .navigationTitle("Course Overview")
@@ -269,9 +269,9 @@ struct CourseOverviewView: View {
                     }
                     .padding(10)
                     
-                    HStack {
+                    HStack(spacing: 10) {
+                        Spacer()
                         ForEach(0..<5) { index in
-                            Spacer()
                             Image(systemName: "star.fill")
                                 .font(.system(size: 30, weight: .semibold))
                                 .foregroundColor(index <= (selectedRating ?? -1) ? Color(UIColor.systemYellow) : Color(UIColor.systemGray2))
@@ -292,7 +292,6 @@ struct CourseOverviewView: View {
                         }
                         Spacer()
                     }
-                    .padding(.horizontal, 40)
                     .padding(.bottom, 20)
                     
                 }

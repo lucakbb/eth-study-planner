@@ -11,7 +11,7 @@ import FirebaseCore
 import SimpleAnalytics
 import FirebaseAppCheck
 
-class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, UIWindowSceneDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         
@@ -23,6 +23,23 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         RemoteConfigProvider.shared.fetchCloudValues()
         
         return true
+    }
+    
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let sceneConfig = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        sceneConfig.delegateClass = Self.self
+        return sceneConfig
+    }
+    
+    func scene( _ scene: UIScene, willConnectTo session: UISceneSession,  options connectionOptions: UIScene.ConnectionOptions) {
+        guard let windowScene = scene as? UIWindowScene else { return }
+        
+#if targetEnvironment(macCatalyst)
+        if let titlebar = windowScene.titlebar {
+            titlebar.titleVisibility = .hidden
+            titlebar.toolbar = nil
+        }
+#endif
     }
 }
 

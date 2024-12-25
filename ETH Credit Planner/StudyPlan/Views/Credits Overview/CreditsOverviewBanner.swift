@@ -104,7 +104,7 @@ struct CreditsOverviewBanner: View {
             .cornerRadius(15)
         } else {
             ZStack {
-                Color(UIColor.systemGray2)
+                Color("Color3")
                 
                 HStack {
                     Image(systemName: "checkmark.circle.fill")

@@ -76,7 +76,7 @@ class RecommendationsAPI: ObservableObject {
                 let allCourses = convertToJSONString(await fetchAllCourses())
                 let takenCourses = convertToJSONString(fetchTakenCourses())
                 let plannedCourses = convertToJSONString(fetchPlannedCourses())
-                let likedTags = (interestsManager.loadInterests())?.titles ?? []
+                let likedTags = (CloudKitPreferencesManager.shared.getInterests())?.titles ?? []
                 
                 // Prepare the request body
                 let requestBody: [String: Any] = [

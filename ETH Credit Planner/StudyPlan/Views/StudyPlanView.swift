@@ -172,8 +172,6 @@ struct CategoryView: View {
         fetchRequest: Category.fetchRequestWithCourses()
     ) var categories: FetchedResults<Category>
     
-    let colors = [Color("Color1"), Color("Color2"), Color("Color3"), Color("Color4"), Color("Color6"), Color("Color7"), Color("Color8"), Color("Color9")]
-    
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack {
@@ -182,7 +180,7 @@ struct CategoryView: View {
                         isCreditOverviewShown = true
                     }
                 
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: UIDevice.current.userInterfaceIdiom == .phone ? 2 : 4), spacing: 12) {
                     ForEach(Array(categories.enumerated()), id: \.element) { index, category in
                         
                         // get courses for category
@@ -202,7 +200,7 @@ struct CategoryView: View {
                             CategoryOverviewView(category: category)
                         } label: {
                             ZStack {
-                                colors.indices.contains(index) ? colors[index] : Color.gray
+                                AppConstants.DefaultObjects.colors.indices.contains(index) ? AppConstants.DefaultObjects.colors[index] : Color.gray
                                 
                                 VStack(alignment: .leading) {
                                     HStack(alignment: .top) {
@@ -292,8 +290,6 @@ struct SemesterView: View {
         fetchRequest: Semester.fetchRequestWithCourses()
     ) var semesters: FetchedResults<Semester>
     
-    let colors = [Color("Color1"), Color("Color2"), Color("Color3"), Color("Color4"), Color("Color6"), Color("Color7"), Color("Color8"), Color("Color9"), Color("Color6"), Color("Color7"), Color("Color8"), Color("Color9")]
-    
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack {
@@ -316,7 +312,7 @@ struct SemesterView: View {
                             HStack {
                                 Text("\(semester.number + 1)")
                                     .font(.system(size: 33, weight: .semibold, design: .rounded))
-                                    .foregroundStyle(colors.indices.contains(index) ? colors[index] : Color.gray)
+                                    .foregroundStyle(AppConstants.DefaultObjects.colors.indices.contains(index) ? AppConstants.DefaultObjects.colors[index] : Color.gray)
                                     .frame(width: 55, height: 55)
                                     .background {
                                         Color(UIColor.systemGroupedBackground)

@@ -14,6 +14,7 @@ struct RecommendationsView: View {
     
     @State var viewModel: RecommendationsViewModel = RecommendationsViewModel()
     @State var isOnboardingIsShown: Bool = false
+    @State var isOnboardingSheetIsShown: Bool = false
     
     @State private var recommendationPopup: Recommendation?
     
@@ -83,7 +84,11 @@ struct RecommendationsView: View {
                             .frame(height: 54)
                             .cornerRadius(15)
                         .onTapGesture {
-                            isOnboardingIsShown = true
+                            if(UIDevice.current.userInterfaceIdiom == .phone) {
+                                isOnboardingIsShown = true
+                            } else {
+                                isOnboardingSheetIsShown = true
+                            }
                         }
                     }
                    
@@ -95,7 +100,7 @@ struct RecommendationsView: View {
                     }
                     
                 }
-                .padding(.horizontal, 16)
+                .padding(.leading, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             }
             .navigationTitle("Recommendations")
             .background(Color(UIColor.systemGroupedBackground))
@@ -104,6 +109,9 @@ struct RecommendationsView: View {
             }
             .fullScreenCover(isPresented: $isOnboardingIsShown) {
                 RecommendationsOnboarding(isPresented: $isOnboardingIsShown)
+            }
+            .sheet(isPresented: $isOnboardingSheetIsShown) {
+                RecommendationsOnboarding(isPresented: $isOnboardingSheetIsShown)
             }
             .sheet(item: $recommendationPopup) { recommendation in
                 RecommendationsSemesterView(recommendation: $recommendationPopup)

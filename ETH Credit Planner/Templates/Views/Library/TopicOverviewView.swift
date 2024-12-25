@@ -25,11 +25,13 @@ struct TopicOverviewView: View {
                             noTemplatesFound
                         }
                         
-                        ForEach($templates, id: \.self) { $template in
-                            NavigationLink {
-                                TemplateOverviewView(template: $template, color: topic.color)
-                            } label: {
-                                TemplatePreviewCard(template: template, color: topic.color)
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: UIDevice.current.userInterfaceIdiom == .phone ? 1 : 2), spacing: 10) {
+                            ForEach($templates, id: \.self) { $template in
+                                NavigationLink {
+                                    TemplateOverviewView(template: $template, color: topic.color)
+                                } label: {
+                                    TemplatePreviewCard(template: template, color: topic.color)
+                                }
                             }
                         }
                         
@@ -114,10 +116,10 @@ struct TemplatePreviewCard: View {
     @State var color: Color = Color("Color1")
     
     var body: some View {
-        ZStack(alignment: .leading) {
+        ZStack(alignment: .center) {
             color
             
-            VStack(alignment: .leading, spacing: 7) {
+            VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
                     Text(template?.title ?? "")
                         .multilineTextAlignment(.leading)
@@ -131,6 +133,8 @@ struct TemplatePreviewCard: View {
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(.white.opacity(0.6))
                 }
+                
+                Spacer()
                 
                 HStack(spacing: 10) {
                     HStack(spacing: 3) {
@@ -174,9 +178,11 @@ struct LoadingPlaceholderCards: View {
     @State var color: Color = Color("Color1")
 
     var body: some View {
-        ForEach(0..<count, id: \.self) { _ in
-            TemplatePreviewCard(template: Template(id: UUID(), title: "ML", shareCode: "", authorName: "Alex", authorID: "", likes: [], amountOfLikes: 42, tags: ["Tag 1", "Tag 2", "Tag 3"], courses: [], amountOfSemesters: 0, amountOfCourses: 0), color: color)
-                .redacted(reason: .placeholder)
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: UIDevice.current.userInterfaceIdiom == .phone ? 1 : 2), spacing: 10) {
+            ForEach(0..<count, id: \.self) { _ in
+                TemplatePreviewCard(template: Template(id: UUID(), title: "ML", shareCode: "", authorName: "Alex", authorID: "", likes: [], amountOfLikes: 42, tags: ["Tag 1", "Tag 2", "Tag 3"], courses: [], amountOfSemesters: 0, amountOfCourses: 0), color: color)
+                    .redacted(reason: .placeholder)
+            }
         }
     }
 }

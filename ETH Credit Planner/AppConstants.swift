@@ -39,6 +39,8 @@ struct AppConstants {
     
     struct DefaultObjects {
         
+        static let colors = [Color("Color1"), Color("Color2"), Color("Color3"), Color("Color4"), Color("Color6"), Color("Color7"), Color("Color8"), Color("Color9"), Color("Color6"), Color("Color7"), Color("Color8"), Color("Color9")]
+        
         // Mapping between categoryID (Int) and Category (String):
         //
         // 0 - "Basisjahr Fächer"

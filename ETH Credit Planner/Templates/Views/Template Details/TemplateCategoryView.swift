@@ -17,8 +17,6 @@ struct TemplateCategoryView: View {
     @State var courses: [[FirestoreCourse]] = []
     @State var isLoading: Bool = false
     
-    let colors = [Color("Color1"), Color("Color2"), Color("Color3"), Color("Color4"), Color("Color6"), Color("Color7"), Color("Color8"), Color("Color9"), Color("Color6"), Color("Color7"), Color("Color8"), Color("Color9")]
-    
     @FetchRequest(
         entity: Category.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Category.id, ascending: true)]
@@ -46,7 +44,7 @@ struct TemplateCategoryView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             }
             .navigationTitle("\(template.authorName)'s Study Plan")
             .background(Color(UIColor.systemGroupedBackground))
@@ -67,7 +65,7 @@ struct TemplateCategoryView: View {
                 }
             }
         }
-        .accentColor(Color("Color1"))
+        .accentColor(Color("Color3"))
     }
     
     var categoryList: some View {
@@ -85,7 +83,7 @@ struct TemplateCategoryView: View {
                         TemplateCategoryOverviewView(courses: $courses, category: category, isEditing: false)
                     } label: {
                         ZStack {
-                            colors[Int(category.id)]
+                            AppConstants.DefaultObjects.colors[Int(category.id)]
                             
                             HStack {
                                 Image(systemName: category.icon ?? "questionmark")

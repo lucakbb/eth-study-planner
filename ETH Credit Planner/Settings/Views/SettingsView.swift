@@ -29,6 +29,8 @@ struct SettingsView: View {
     @State var amountOfClicks: Int = 0
     @State var isABPopupShown: Bool = false
     
+    @State var isICloudSyncEnabled: Bool = CloudKitPreferencesManager.shared.getICloudSync()
+    
     @FetchRequest(
         entity: Semester.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Semester.number, ascending: true)]
@@ -68,7 +70,7 @@ struct SettingsView: View {
                         .frame(width: 45, height: 45)
                         .cornerRadius(5)
                         
-                        Text("\(UserDefaults.standard.string(forKey: "userName") ?? "")")
+                        Text("\(CloudKitPreferencesManager.shared.getUserName())")
                             .lineLimit(1)
                             .font(.system(size: 21, weight: .medium))
                         
@@ -101,7 +103,7 @@ struct SettingsView: View {
                     
                     Button("Save", action: {
                         if(changedName != "" && changedName.count <= 30) {
-                            UserDefaults.standard.set(changedName, forKey: "userName")
+                            CloudKitPreferencesManager.shared.setUserName(changedName)
                             
                             isChangeNamePresented = false
                         } else {
@@ -155,6 +157,36 @@ struct SettingsView: View {
                             }
                         } message: {
                             Text("Are you sure you want to delete a semester? All courses in that semester will also be deleted.")
+                        }
+
+                }
+                .padding(.vertical, 10)
+                .padding(.leading, 13)
+                .padding(.trailing, 14)
+                .listRowInsets(EdgeInsets())
+                .contentShape(Rectangle())
+            }
+            
+            Section {
+                HStack(spacing: 13) {
+                    ZStack {
+                        Color(Color("Color7"))
+                        Image(systemName: "cloud.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 15, weight: .semibold))
+                    }
+                    .frame(width: 29, height: 29)
+                    .cornerRadius(5)
+                    
+                    Text("iCloud Sync")
+                        .font(.system(size: 18))
+                    
+                    Spacer()
+                    
+                    Toggle("iCloud Synchronisierung", isOn: $isICloudSyncEnabled)
+                        .labelsHidden()
+                        .onChange(of: isICloudSyncEnabled) {
+                            PersistenceController.toggleICloudSync(enabled: isICloudSyncEnabled)
                         }
 
                 }

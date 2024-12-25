@@ -110,11 +110,11 @@ struct CategoryOverviewView: View {
                         .foregroundStyle(Color.gray.opacity(0.3))
                     
                     if let minCredits = category?.minCredits, minCredits != 0 {
-                        let plannedProgress = min(Float(creditsPlanned)/Float(minCredits), 1) * 0.5
+                        let plannedProgress = min(Float(creditsPlanned + creditsEarned)/Float(minCredits), 1) * 0.5
                         let earnedProgress = min(Float(creditsEarned)/Float(minCredits), 1) * 0.5
                         
                         Circle()
-                            .trim(from: 0, to: CGFloat(earnedProgress + plannedProgress))
+                            .trim(from: 0, to: CGFloat(plannedProgress))
                             .stroke(style: StrokeStyle(lineWidth: 17, lineCap: .round))
                             .rotationEffect(.degrees(180))
                             .foregroundStyle(Color("Color1"))

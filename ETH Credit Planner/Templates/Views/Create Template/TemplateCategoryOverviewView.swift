@@ -38,7 +38,7 @@ struct TemplateCategoryOverviewView: View {
                         AddCourseButton(isAddCoursePopupShown: $isAddCoursePopupShown)
                     }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             }
             .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle(category.name ?? "")

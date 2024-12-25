@@ -82,6 +82,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8183FE292CD78CAD00F79B3B /* Build configuration list for PBXNativeTarget "ETH Credit Planner" */;
 			buildPhases = (
+				8179A5C72D0F269700CCBF8F /* ShellScript */,
 				8183FE112CD78CAB00F79B3B /* Sources */,
 				8183FE122CD78CAB00F79B3B /* Frameworks */,
 				8183FE132CD78CAB00F79B3B /* Resources */,
@@ -158,6 +159,26 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		8179A5C72D0F269700CCBF8F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(PROJECT_DIR)/GoogleService-Info.plist",
+				"$(PROJECT_DIR)/Secrets.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/bash\n\n# Check if the build is running in Xcode Cloud\nif [ \"$CI\" != \"true\" ]; then\n  echo \"Build script is not running because this is not an Xcode Cloud build.\"\n  exit 0\nfi\n\n# Paths to plist files\nGOOGLE_SERVICE_INFO_PLIST=\"${PROJECT_DIR}/GoogleService-Info.plist\"\nSECRETS_PLIST=\"${PROJECT_DIR}/Secrets.plist\"\n\n# Create GoogleService-Info.plist\ncat <<EOF > $GOOGLE_SERVICE_INFO_PLIST\n{\n  \"API_KEY\": \"${API_KEY}\",\n  \"GCM_SENDER_ID\": \"${GCM_SENDER_ID}\",\n  \"PLIST_VERSION\": \"1\",\n  \"BUNDLE_ID\": \"${BUNDLE_ID}\",\n  \"PROJECT_ID\": \"${PROJECT_ID}\",\n  \"STORAGE_BUCKET\": \"${STORAGE_BUCKET}\",\n  \"IS_ADS_ENABLED\": NO,\n  \"IS_ANALYTICS_ENABLED\": NO,\n  \"IS_APPINVITE_ENABLED\": YES,\n  \"IS_GCM_ENABLED\": YES,\n  \"IS_SIGNIN_ENABLED\": YES,\n  \"GOOGLE_APP_ID\": \"${GOOGLE_APP_ID}\"\n}\nEOF\n\n# Check if GoogleService-Info.plist was created successfully\nif [ ! -f \"$GOOGLE_SERVICE_INFO_PLIST\" ]; then\n  echo \"GoogleService-Info.plist could not be created. Please check the Environment Variables.\"\n  exit 1\nfi\n\necho \"GoogleService-Info.plist was successfully created.\"\n\n# Create Secrets.plist\ncat <<EOF > $SECRETS_PLIST\n{\n  \"API_URL\": \"${RECOMMENDATIONS_API_URL}\"\n}\nEOF\n\n# Check if Secrets.plist was created successfully\nif [ ! -f \"$SECRETS_PLIST\" ]; then\n  echo \"Secrets.plist could not be created. Please check the Environment Variables.\"\n  exit 1\nfi\n\necho \"Secrets.plist was successfully created.\"\n";
+			showEnvVarsInLog = 0;
+		};
 		81EB005C2CF279EE001E7467 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -201,7 +222,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "ETH Credit Planner/ETH_Credit_Planner.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 78;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"ETH Credit Planner/Preview Content\"";
 				DEVELOPMENT_TEAM = WKG42DS275;
 				ENABLE_PREVIEWS = YES;
@@ -219,16 +240,17 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.hci.ETH-Credit-Planner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -239,7 +261,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "ETH Credit Planner/ETH_Credit_Planner.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 78;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"ETH Credit Planner/Preview Content\"";
 				DEVELOPMENT_TEAM = WKG42DS275;
 				ENABLE_PREVIEWS = YES;
@@ -257,16 +279,17 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.hci.ETH-Credit-Planner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

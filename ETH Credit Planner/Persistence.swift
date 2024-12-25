@@ -7,106 +7,157 @@
 
 import CoreData
 
-struct PersistenceController {
-    static let shared = PersistenceController()
-
-    @MainActor
-    static let preview: PersistenceController = {
-        let result = PersistenceController(inMemory: true)
-        let viewContext = result.container.viewContext
-        
-        let firstYearCourses = Category(context: viewContext)
-        firstYearCourses.id = 0
-        firstYearCourses.name = "First Year Courses"
-        firstYearCourses.icon = "book.closed.fill"
-        firstYearCourses.maxCredits = 56
-        firstYearCourses.minCredits = 56
-        
-        let basicCourses = Category(context: viewContext)
-        basicCourses.id = 1
-        basicCourses.name = "Basic Courses"
-        basicCourses.icon = "lightbulb.max.fill"
-        basicCourses.maxCredits = 52
-        basicCourses.minCredits = 45
-        
-        let coreCourses = Category(context: viewContext)
-        coreCourses.id = 2
-        coreCourses.name = "Core Courses"
-        coreCourses.icon = "star.fill"
-        coreCourses.maxCredits = 180
-        coreCourses.minCredits = 32
-        
-        let minorCourses = Category(context: viewContext)
-        minorCourses.id = 3
-        minorCourses.name = "Minor Courses"
-        minorCourses.icon = "flask.fill"
-        minorCourses.maxCredits = 180
-        minorCourses.minCredits = 5
-        
-        let electives = Category(context: viewContext)
-        electives.id = 4
-        electives.name = "Electives"
-        electives.icon = "text.page.badge.magnifyingglass"
-        electives.maxCredits = 180
-        electives.minCredits = 0
-        
-        let gess = Category(context: viewContext)
-        gess.id = 5
-        gess.name = "Science in Perspective"
-        gess.icon = "binoculars.fill"
-        gess.maxCredits = 6
-        gess.minCredits = 6
-        
-        let seminar = Category(context: viewContext)
-        seminar.id = 6
-        seminar.name = "Seminar"
-        seminar.icon = "document.on.document.fill"
-        seminar.maxCredits = 2
-        seminar.minCredits = 2
-        
-        let thesis = Category(context: viewContext)
-        thesis.id = 7
-        thesis.name = "Bachelor Thesis"
-        thesis.icon = "pencil"
-        thesis.maxCredits = 10
-        thesis.minCredits = 10
-        
-        let semester1 = Semester(context: viewContext)
-        semester1.number = 1
-        
-        do {
-            try viewContext.save()
-        } catch {
-            print(error)
+class PersistenceController {
+    static private var _shared: PersistenceController?
+    static var shared: PersistenceController {
+        if _shared == nil {
+            _shared = PersistenceController()
         }
-        
-        return result
-        
-    }()
+        return _shared!
+    }
 
     let container: NSPersistentContainer
 
     init(inMemory: Bool = false) {
-        container = NSPersistentContainer(name: "ETH_Credit_Planner")
-        if inMemory {
-            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
-        }
-        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
-            if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+        let useCloudSync = CloudKitPreferencesManager.shared.getICloudSync()
 
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
-                print(error)
+        if useCloudSync {
+            let cloudContainer = NSPersistentCloudKitContainer(name: "ETH_Credit_Planner")
+            if let description = cloudContainer.persistentStoreDescriptions.first {
+                description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.hci.ETHCreditPlanner")
+                description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+                description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
             }
-        })
+            
+            container = cloudContainer
+        } else {
+            container = NSPersistentContainer(name: "ETH_Credit_Planner")
+        }
+
+        if inMemory {
+            container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+        }
+
+       
+        container.loadPersistentStores { (storeDescription, error) in
+            if let error = error as NSError? {
+                print("Unresolved error \(error), \(error.userInfo)")
+            } else {
+                print("Persistent Store loaded: \(storeDescription.url?.absoluteString ?? "Unknown URL")")
+            }
+        }
+
         container.viewContext.automaticallyMergesChangesFromParent = true
+    }
+    
+    static func toggleICloudSync(enabled: Bool) {
+        CloudKitPreferencesManager.shared.setICloudSync(enabled)
+
+        if(enabled) {
+            NSUbiquitousKeyValueStore.default.set(UserDefaults.standard.bool(forKey: "oldUser"), forKey: "oldUser")
+            NSUbiquitousKeyValueStore.default.set(UserDefaults.standard.string(forKey: "userName"), forKey: "userName")
+            
+            do {
+                let interestsManager = InterestsManager()
+                let interests = interestsManager.loadInterests()
+                let encodedInterests = try JSONEncoder().encode(interests)
+                NSUbiquitousKeyValueStore.default.set(encodedInterests, forKey: "interests")
+            } catch {
+                print("Failed to synchronize interests: \(error)")
+            }
+        }
+        
+        _shared = PersistenceController()
+    }
+    
+    func cleanUpDuplicates() {
+        resolveDuplicates(for: "Semester", in: container.viewContext)
+        resolveDuplicates(for: "Category", in: container.viewContext)
+    }
+    
+    /// Attempts to find and remove duplicate objects for a given entity in the provided managed object context.
+    /// This method identifies duplicates based on a unique identifier key, determines the "best" object for each duplicate set,
+    /// and removes all other redundant objects. Finally, it saves the changes to the context.
+    ///
+    /// - Parameters:
+    ///   - entityName: The name of the entity to inspect for duplicates.
+    ///   - context: The NSManagedObjectContext in which duplicates should be resolved.
+    private func resolveDuplicates(for entityName: String, in context: NSManagedObjectContext) {
+        let uniqueKey = uniqueIDKey(for: entityName)
+        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: entityName)
+        
+        do {
+            let allObjects = try context.fetch(fetchRequest)
+            
+            // Hier wird der tatsächliche Wert geholt und je nach Typ in String konvertiert.
+            let groupedObjects = Dictionary(grouping: allObjects) { object -> String in
+                let value = object.value(forKey: uniqueKey)
+                
+                if let stringValue = value as? String {
+                    return stringValue
+                } else if let intValue = value as? Int16 {
+                    return String(intValue)
+                } else {
+                    return ""
+                }
+            }
+            
+            for (uniqueID, duplicates) in groupedObjects {
+                guard !uniqueID.isEmpty, duplicates.count > 1,
+                      let bestObject = chooseBestObject(from: duplicates) else { continue }
+                
+                for object in duplicates where object != bestObject {
+                    context.delete(object)
+                }
+            }
+            
+            try context.save()
+        } catch {
+            print("Failed to resolve duplicates for \(entityName): \(error.localizedDescription)")
+        }
+    }
+
+    /// Provides the key name that uniquely identifies objects of a given entity.
+    /// By customizing this logic per entity, one can flexibly determine how duplicates are identified.
+    ///
+    /// - Parameter entityName: The name of the entity.
+    /// - Returns: The attribute name used to uniquely identify objects of the given entity.
+    private func uniqueIDKey(for entityName: String) -> String {
+        switch entityName {
+        case "Semester":
+            return "number"
+        default:
+            return "id"
+        }
+    }
+
+    /// Determines the "best" object from a list of duplicate objects.
+    /// The selection criteria can be customized, for example by prioritizing objects with more related courses,
+    /// or those with the greatest number of passed courses.
+    ///
+    /// - Parameter duplicates: A non-empty list of objects considered duplicates.
+    /// - Returns: The object deemed to be the best candidate or nil if none could be determined.
+    private func chooseBestObject(from duplicates: [NSManagedObject]) -> NSManagedObject? {
+        guard !duplicates.isEmpty else { return nil }
+        
+        let sortedDuplicates = duplicates.sorted { obj1, obj2 in
+            let courses1 = (obj1.value(forKey: "courses") as? Set<NSManagedObject>) ?? []
+            let courses2 = (obj2.value(forKey: "courses") as? Set<NSManagedObject>) ?? []
+            
+            if courses1.count != courses2.count {
+                return courses1.count > courses2.count
+            }
+            
+            let passedCount1 = courses1.filter { ($0.value(forKey: "isPassed") as? Bool) == true }.count
+            let passedCount2 = courses2.filter { ($0.value(forKey: "isPassed") as? Bool) == true }.count
+            
+            if passedCount1 != passedCount2 {
+                return passedCount1 > passedCount2
+            }
+            
+            return false
+        }
+        
+        return sortedDuplicates.first
     }
 }

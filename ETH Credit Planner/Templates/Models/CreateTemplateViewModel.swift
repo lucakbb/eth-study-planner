@@ -95,7 +95,7 @@ class CreateTemplateViewModel: ObservableObject {
             return
         }
         
-        let template = Template(id: UUID(), title: title, shareCode: createShareCode(), authorName: UserDefaults.standard.string(forKey: "userName") ?? "", authorID: Auth.auth().currentUser?.uid ?? "", likes: [], amountOfLikes: 0, tags: Array(selectedTags), courses: templateSemesters, amountOfSemesters: templateSemesters.count, amountOfCourses: courses.flatMap { $0 }.count)
+        let template = Template(id: UUID(), title: title, shareCode: createShareCode(), authorName: CloudKitPreferencesManager.shared.getUserName(), authorID: Auth.auth().currentUser?.uid ?? "", likes: [], amountOfLikes: 0, tags: Array(selectedTags), courses: templateSemesters, amountOfSemesters: templateSemesters.count, amountOfCourses: courses.flatMap { $0 }.count)
         
         let collectionRef = FirestoreAPI.shared.db.collection("templates")
         
