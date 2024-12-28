@@ -100,7 +100,7 @@ struct RecommendationsView: View {
                     }
                     
                 }
-                .padding(.leading, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
+                .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             }
             .navigationTitle("Recommendations")
             .background(Color(UIColor.systemGroupedBackground))

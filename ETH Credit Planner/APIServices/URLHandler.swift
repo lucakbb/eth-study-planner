@@ -74,9 +74,7 @@ class URLHandler {
         }
         
         // Fetch the template with the resolved template ID
-        print("Fetching template with id: \(id)")
         if let template = await fetchTemplate(id: id) {
-            print("Successfully fetched template: \(template)")
             return template
         }
         

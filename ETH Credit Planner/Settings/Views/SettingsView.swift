@@ -34,7 +34,7 @@ struct SettingsView: View {
     ) var semesters: FetchedResults<Semester>
     
     let viewContext = PersistenceController.shared.container.viewContext
-    let settings = [SettingsEntry(name: "Support", image: "mail.fill", color: UIColor(Color("Color1"))), SettingsEntry(name: "GitHub", image: "chevron.left.forwardslash.chevron.right", color: UIColor(Color("Color2"))), SettingsEntry(name: "Review App", image: "star.fill", color: UIColor.systemYellow), SettingsEntry(name: "Legal Notice", image: "book.closed.fill", color: UIColor.gray), SettingsEntry(name: "Privacy Policy", image: "lock.fill", color: UIColor.gray)]
+    let settings = [SettingsEntry(name: "Support", image: "mail.fill", color: UIColor(Color("Color3"))), SettingsEntry(name: "GitHub", image: "chevron.left.forwardslash.chevron.right", color: UIColor(Color("Color2"))), SettingsEntry(name: "Review App", image: "star.fill", color: UIColor.systemYellow), SettingsEntry(name: "Legal Notice", image: "book.closed.fill", color: UIColor.gray), SettingsEntry(name: "Privacy Policy", image: "lock.fill", color: UIColor.gray)]
     
     var body: some View {
         NavigationStack {

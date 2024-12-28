@@ -118,6 +118,12 @@ struct ContentView: View {
                         selectedMenu.view
                     }
                 }
+                .onOpenURL { incomingURL in
+                    Task {
+                        print("App was opened via URL: \(incomingURL)")
+                        sharedTemplate = await URLHandler.shared.handleIncomingURL(incomingURL)
+                    }
+                }
                 .onAppear {
                     if(UserDefaults.standard.string(forKey: "currentVersion") != "1.1") {
                         isChangelogShown = true
@@ -125,6 +131,18 @@ struct ContentView: View {
                 }
                 .sheet(isPresented: $isChangelogShown) {
                     ChangelogView(isPresented: $isChangelogShown)
+                }
+                .sheet(item: $sharedTemplate) { template in
+                    NavigationStack {
+                        TemplateOverviewView(template: .constant(template), color: Color("Color1"))
+                            .toolbar {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(Color(UIColor.systemGray3))
+                                    .onTapGesture {
+                                        sharedTemplate = nil
+                                    }
+                            }
+                    }
                 }
             }
         } else {

@@ -351,7 +351,7 @@ struct TemplateLibraryView: View {
                     }
                 }
             }
-            .padding(.leading, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
+            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             .onAppear {
                 if(mostLikedTemplates.count == 0) {
                     Task {
