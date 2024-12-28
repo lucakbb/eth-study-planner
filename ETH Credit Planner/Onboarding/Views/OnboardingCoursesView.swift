@@ -20,7 +20,7 @@ struct OnboardingCoursesView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     
-                    ProgressBar(progress: 3, amountOfSteps: 4)
+                    ProgressBar(progress: 4, amountOfSteps: 5)
                     
                     ZStack {
                         Color(UIColor.systemGray2)

@@ -87,9 +87,10 @@ class CloudKitPreferencesManager {
         
         /// Returns the Bool value for `oldUser`, with a fallback to local storage if iCloud does not have it.
         func getOldUser() -> Bool {
-            if localStore.bool(forKey: Keys.iCloudSync) {
+            if localStore.bool(forKey: Keys.oldUser) {
                 return true
             } else if let iCloudValue = iCloudStore.object(forKey: Keys.oldUser) as? Bool {
+                localStore.set(iCloudValue, forKey: Keys.oldUser)
                 return iCloudValue
             } else {
                 return false
@@ -98,7 +99,7 @@ class CloudKitPreferencesManager {
         
         /// Returns the String value for `userName`, with a fallback to local storage if iCloud does not have it.
         func getUserName() -> String {
-            if localStore.bool(forKey: Keys.iCloudSync), let iCloudValue = iCloudStore.object(forKey: Keys.userName) as? String {
+            if localStore.bool(forKey: Keys.userName), let iCloudValue = iCloudStore.object(forKey: Keys.userName) as? String {
                 localStore.set(iCloudValue, forKey: Keys.userName)
                 return iCloudValue
             }
@@ -108,7 +109,7 @@ class CloudKitPreferencesManager {
         /// Decodes and returns the `Interests` struct, with a fallback to local storage if iCloud does not have it.
         func getInterests() -> Interests? {
             // Try iCloud first
-            if localStore.bool(forKey: Keys.iCloudSync), let iCloudData = iCloudStore.object(forKey: Keys.interests) as? Data {
+            if localStore.bool(forKey: Keys.interests), let iCloudData = iCloudStore.object(forKey: Keys.interests) as? Data {
                 do {
                     return try JSONDecoder().decode(Interests.self, from: iCloudData)
                 } catch {

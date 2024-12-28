@@ -144,37 +144,43 @@ struct OnboardingView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     
+                    ProgressBar(progress: 0, amountOfSteps: 5)
+                    
                     Text("Would you like to start fresh or import existing data from another device via iCloud?")
                         .multilineTextAlignment(.leading)
                         .font(.system(size: 20, weight: .semibold))
                     
-                    Spacer()
-                    
-                    ZStack {
-                        Color("Color1")
-                        
-                        VStack(spacing: 25) {
+                    VStack(spacing: 20) {
+                        ZStack {
+                            Color(UIColor.secondarySystemGroupedBackground)
+                            
                             VStack(spacing: 5) {
                                 Image(systemName: "arrow.right.circle.fill")
+                                    .foregroundColor(Color("Color3"))
                                     .font(.system(size: 30, weight: .semibold))
                                 Text("Start fresh")
+                                    .foregroundColor(Color("Color3"))
                                     .font(.system(size: 20, weight: .semibold))
                             }
-                            .padding(.top, 25)
+                            .padding(.vertical, 25)
                             .onTapGesture {
                                 progress += 1
                             }
-                            
-                            Divider()
-                                .background(Color.white)
+                        }
+                        .cornerRadius(10)
+                        
+                        ZStack {
+                            Color(UIColor.secondarySystemGroupedBackground)
                             
                             VStack(spacing: 5) {
                                 Image(systemName: "cloud.fill")
+                                    .foregroundColor(Color("Color3"))
                                     .font(.system(size: 30, weight: .semibold))
                                 Text("Use iCloud")
+                                    .foregroundColor(Color("Color3"))
                                     .font(.system(size: 20, weight: .semibold))
                             }
-                            .padding(.bottom, 25)
+                            .padding(.vertical, 25)
                             .onTapGesture {
                                 isiCloudAlertShown = true
                             }
@@ -188,11 +194,8 @@ struct OnboardingView: View {
                                 Text("To view and edit data from another device, please follow these steps:\n\n1. On the other device whose data you wish to sync, open the ETH Study Planner settings and enable the \"iCloud Sync\" option. Note that it may take a few moments for the data to upload.\n\n2. Restart the app on this device and wait briefly.\n\nIf these steps do not work, ensure that you are signed in with the same Apple ID on both devices and that you have sufficient iCloud storage space.\n\nImportant: Do not proceed with \"Start Fresh\" onboarding on this device, as doing so may cause synchronization issues.\n\nIf you have any questions or encounter any problems, please contact us at studyplanner.ch.")
                             }
                         }
-                        .padding(.horizontal)
+                        .cornerRadius(10)
                     }
-                    .cornerRadius(10)
-                    .padding(.top, -5)
-                    .padding(.bottom, 30)
                     
                     Spacer()
                 }
@@ -208,7 +211,7 @@ struct OnboardingView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     
-                    ProgressBar(progress: 2, amountOfSteps: 4)
+                    ProgressBar(progress: 3, amountOfSteps: 5)
                     
                     Text("How many semesters do you plan to study in total?")
                         .multilineTextAlignment(.leading)
@@ -290,7 +293,7 @@ struct OnboardingView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     
-                    ProgressBar(progress: 1, amountOfSteps: 4)
+                    ProgressBar(progress: 2, amountOfSteps: 5)
                     
                     ZStack {
                         Color(UIColor.systemGray2)
@@ -326,7 +329,7 @@ struct OnboardingView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     
-                    ProgressBar(progress: 0, amountOfSteps: 4)
+                    ProgressBar(progress: 1, amountOfSteps: 5)
                     
                     ZStack {
                         Color(UIColor.systemGray2)

@@ -179,7 +179,7 @@ struct CategoryView: View {
     
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack {
+            VStack(spacing: 12) {
                 CreditsOverviewBanner()
                     .onTapGesture {
                         isCreditOverviewShown = true
