@@ -72,6 +72,7 @@ struct ChangelogView: View {
                                     Text("\u{2022} The app is now also available on iPad and Mac.")
                                     Text("\u{2022} Your study plan can now be transferred to multiple devices via iCloud. To do this, activate “iCloud Sync” in the settings.")
                                     Text("\u{2022} Courses, such as Soccer Analytics, which are offered in two categories, are now listed for each of these categories.")
+                                    Text("\u{2022} Added the ability to share templates via a direct link.")
                                     Text("\u{2022} When adding a course, it is now easier to see if it is not offered in a semester.")
                                 }
                                 .padding(.bottom)

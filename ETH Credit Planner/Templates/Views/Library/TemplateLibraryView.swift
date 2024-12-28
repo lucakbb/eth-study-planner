@@ -11,7 +11,6 @@ import SimpleAnalytics
 struct TemplateLibraryView: View {
     @Environment(\.isSearching) private var isSearching
     @ObservedObject var viewModel: TemplateLibraryViewModel = TemplateLibraryViewModel()
-    @AppStorage("BVersionTemplates") private var bVersion = false
     
     @State var searchText: String = ""
     @State var searchResults: [Template] = []
@@ -47,50 +46,48 @@ struct TemplateLibraryView: View {
                         ScrollView(showsIndicators: false) {
                             VStack(alignment: .leading, spacing: 20) {
                                 
-                                if(!bVersion) {
-                                    VStack(alignment: .leading, spacing: 5) {
-                                        Text("Create Templates")
-                                            .font(.system(size: 22, weight: .bold))
-                                            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
-                                        
-                                        NavigationLink {
-                                            UploadedTemplatesView(isUploadedTemplatesShown: $isUploadedTemplatesShown)
-                                                .onAppear {
-                                                    SimpleAnalytics.shared.track(path: ["templates", "published-templates"])
-                                                }
-                                        } label: {
-                                            ZStack {
-                                                Color("Color7")
-                                                
-                                                HStack {
-                                                    ZStack {
-                                                        Color(.white)
-                                                        Image(systemName: "person.fill")
-                                                            .font(.system(size: 20, weight: .semibold))
-                                                            .foregroundStyle(Color("Color7"))
-                                                    }
-                                                    .frame(width: 35, height: 35)
-                                                    .cornerRadius(10)
-                                                    
-                                                    Text("Your Templates")
-                                                        .font(.system(size: 20, weight: .semibold))
-                                                        .foregroundStyle(.white)
-                                                    
-                                                    Spacer()
-                                                    
-                                                    Image(systemName: "arrow.right")
-                                                        .font(.system(size: 20, weight: .semibold))
-                                                        .foregroundStyle(.white)
-                                                }
-                                                .padding(.horizontal, 12)
+                                VStack(alignment: .leading, spacing: 5) {
+                                    Text("Create Templates")
+                                        .font(.system(size: 22, weight: .bold))
+                                        .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
+                                    
+                                    NavigationLink {
+                                        UploadedTemplatesView(isUploadedTemplatesShown: $isUploadedTemplatesShown)
+                                            .onAppear {
+                                                SimpleAnalytics.shared.track(path: ["templates", "published-templates"])
                                             }
-                                            .frame(height: 54)
-                                            .cornerRadius(15)
-                                            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
+                                    } label: {
+                                        ZStack {
+                                            Color("Color7")
+                                            
+                                            HStack {
+                                                ZStack {
+                                                    Color(.white)
+                                                    Image(systemName: "person.fill")
+                                                        .font(.system(size: 20, weight: .semibold))
+                                                        .foregroundStyle(Color("Color7"))
+                                                }
+                                                .frame(width: 35, height: 35)
+                                                .cornerRadius(10)
+                                                
+                                                Text("Your Templates")
+                                                    .font(.system(size: 20, weight: .semibold))
+                                                    .foregroundStyle(.white)
+                                                
+                                                Spacer()
+                                                
+                                                Image(systemName: "arrow.right")
+                                                    .font(.system(size: 20, weight: .semibold))
+                                                    .foregroundStyle(.white)
+                                            }
+                                            .padding(.horizontal, 12)
                                         }
+                                        .frame(height: 54)
+                                        .cornerRadius(15)
+                                        .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
                                     }
-                                    .padding(.top, 5)
                                 }
+                                .padding(.top, 5)
                                 
                                 topics
                                 
@@ -103,15 +100,6 @@ struct TemplateLibraryView: View {
                                 mostLikes
                                     .padding(.bottom, 80)
                             }
-                        }
-                        
-                        if(bVersion) {
-                            VStack {
-                                Spacer()
-                                
-                                ChangeTemplatesViewButton(isUploadedTemplatesShown: $isUploadedTemplatesShown)
-                            }
-                            .padding(.bottom, 15)
                         }
                     }
                 } else {
@@ -386,67 +374,6 @@ struct TemplateLibraryView: View {
                 .font(.system(size: 23, weight: .semibold))
                 .foregroundStyle(Color(UIColor.systemGray2))
         }
-    }
-}
-
-struct ChangeTemplatesViewButton: View {
-    @Binding var isUploadedTemplatesShown: Bool
-    
-    var body: some View {
-        HStack(spacing: 10) {
-            HStack(spacing: 3) {
-                Image(systemName: "rectangle.stack.fill")
-                    .font(.system(size: 15, weight: .semibold))
-                Text("Library")
-                    .font(.system(size: 15, weight: .semibold))
-            }
-            .padding(.horizontal, 10)
-            .background {
-                if(!isUploadedTemplatesShown) {
-                    Color(UIColor.systemBackground)
-                        .frame(height: 40)
-                        .cornerRadius(40)
-                }
-            }
-            .onTapGesture {
-                isUploadedTemplatesShown = false
-                
-                let generator = UIImpactFeedbackGenerator(style: .medium)
-                generator.impactOccurred()
-            }
-            
-            HStack(spacing: 3) {
-                Image(systemName: "person.fill")
-                    .font(.system(size: 15, weight: .semibold))
-                Text("Published")
-                    .font(.system(size: 15, weight: .semibold))
-            }
-            .padding(.horizontal, 10)
-            .background {
-                if(isUploadedTemplatesShown) {
-                    Color(UIColor.systemBackground)
-                        .frame(height: 40)
-                        .cornerRadius(40)
-                }
-            }
-            .onTapGesture {
-                isUploadedTemplatesShown = true
-                
-                let generator = UIImpactFeedbackGenerator(style: .medium)
-                generator.impactOccurred()
-            }
-        }
-        .frame(height: 48)
-        .padding(.horizontal, 5)
-        .background {
-            RoundedRectangle(cornerRadius: 40)
-                .foregroundStyle(Color(UIColor.tertiarySystemGroupedBackground))
-        }
-        .cornerRadius(40)
-        .overlay(
-            RoundedRectangle(cornerRadius: 40)
-                .stroke(Color(UIColor.systemGray3), lineWidth: 1)
-        )
     }
 }
 

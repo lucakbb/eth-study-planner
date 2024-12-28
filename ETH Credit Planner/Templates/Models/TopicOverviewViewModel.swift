@@ -10,7 +10,7 @@ import FirebaseFirestore
 import FirebaseAuth
 
 // Amount of Semesters/Courses have to be saved since otherwise we can't filter/sort for it in Firebase
-struct Template: Hashable, Decodable, Encodable {
+struct Template: Hashable, Decodable, Encodable, Identifiable {
     var id: UUID
     var title: String
     var shareCode: String

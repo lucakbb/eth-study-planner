@@ -99,10 +99,6 @@ struct AddCourseView: View {
                         return course.name == filteredCourse.name
                     }
                     
-                    if(hasMatchingPrefix) {
-                        print(filteredCourse.name)
-                    }
-                    
                     return !hasMatchingPrefix
                 }
             }

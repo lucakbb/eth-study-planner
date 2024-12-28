@@ -11,19 +11,24 @@ import SimpleAnalytics
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
+    
     @AppStorage("oldUser") private var oldUser = false
-    @AppStorage("BVersionRecommendations") private var bVersion = false
     @AppStorage("recommendationsEnabled") private var recommendationsEnabled = true
 
     @State private var selectedMenu: MenuItem? = .semesters
     @State private var isCreditOverviewShown = false
     @State private var isChangelogShown = false
     
+    @State private var sharedTemplate: Template? = nil
+    
     var body: some View {
         if(oldUser || CloudKitPreferencesManager.shared.getOldUser()) {
             if UIDevice.current.userInterfaceIdiom == .phone {
                 TabView {
                     StudyPlanView()
+                        .onAppear {
+                            PersistenceController.shared.cleanUpDuplicates()
+                        }
                         .tabItem {
                             Label("Study Plan", systemImage: "doc.text")
                         }
@@ -33,19 +38,23 @@ struct ContentView: View {
                             Label("Search", systemImage: "magnifyingglass")
                         }
                     
-                    if(!bVersion) {
-                        if(recommendationsEnabled) {
-                            RecommendationsView()
-                                .tabItem {
-                                    Label("Recommendations", systemImage: "star.fill")
-                                }
-                        }
+                    if(recommendationsEnabled) {
+                        RecommendationsView()
+                            .tabItem {
+                                Label("Recommendations", systemImage: "star.fill")
+                            }
                     }
                     
                     TemplateLibraryView()
                         .tabItem {
                             Label("Templates", systemImage: "rectangle.stack")
                         }
+                }
+                .onOpenURL { incomingURL in
+                    Task {
+                        print("App was opened via URL: \(incomingURL)")
+                        sharedTemplate = await URLHandler.shared.handleIncomingURL(incomingURL)
+                    }
                 }
                 .onAppear {
                     if(UserDefaults.standard.string(forKey: "currentVersion") != "1.1") {
@@ -54,6 +63,18 @@ struct ContentView: View {
                 }
                 .sheet(isPresented: $isChangelogShown) {
                     ChangelogView(isPresented: $isChangelogShown)
+                }
+                .sheet(item: $sharedTemplate) { template in
+                    NavigationStack {
+                        TemplateOverviewView(template: .constant(template), color: Color("Color1"))
+                            .toolbar {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(Color(UIColor.systemGray3))
+                                    .onTapGesture {
+                                        sharedTemplate = nil
+                                    }
+                            }
+                    }
                 }
             } else if UIDevice.current.userInterfaceIdiom == .pad {
                 NavigationSplitView {

@@ -65,7 +65,7 @@ struct OnboardingView: View {
                 .padding(.horizontal, 16)
                 .onTapGesture {
                     Task {
-                        if(progress == 3) {
+                        if(progress == 4) {
                             if(isLoading) {
                                 return
                             }
@@ -80,17 +80,17 @@ struct OnboardingView: View {
                             }
                         }
                         
-                        if(progress == 1 && (name.isEmpty || name.count > 30)) {
+                        if(progress == 2 && (name.isEmpty || name.count > 30)) {
                             isNameAlertShown = true
                             return
                         }
                         
-                        if(progress == 2 && selectedInterests.count <= 2) {
+                        if(progress == 3 && selectedInterests.count <= 2) {
                             isInterestsAlertShown = true
                             return
                         }
                         
-                        if(progress <= 3) {
+                        if(progress <= 4) {
                             progress += 1
                         } else {
                             SimpleAnalytics.shared.track(event: "finished onboarding")

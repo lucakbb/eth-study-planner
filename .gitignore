@@ -14,6 +14,11 @@
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 
+## Config Files
+GoogleService-Info.plist
+Secrets.plist
+local.env
+
 ## Obj-C/Swift specific
 *.hmap
 
@@ -40,4 +45,3 @@ Icon
 ._*
 .Spotlight-V100
 .Trashes
-.env

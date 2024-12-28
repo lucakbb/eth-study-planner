@@ -10,6 +10,9 @@ import CoreData
 import SimpleAnalytics
 
 struct StudyPlanView: View {
+    @StateObject private var persistenceController = PersistenceController.shared
+    @Environment(\.managedObjectContext) private var viewContext
+    
     @State var isCategoryViewShown = false
     @State var isCreditOverviewShown = false
     @State var isLoading = false
@@ -165,6 +168,8 @@ struct ChangeViewButton: View {
 }
 
 struct CategoryView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    
     @StateObject private var viewModel: StudyPlanViewModel = StudyPlanViewModel()
     @Binding var isCreditOverviewShown: Bool
     
@@ -283,6 +288,8 @@ struct CategoryView: View {
 }
 
 struct SemesterView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    
     @StateObject private var viewModel: StudyPlanViewModel = StudyPlanViewModel()
     @Binding var isCreditOverviewShown: Bool
     

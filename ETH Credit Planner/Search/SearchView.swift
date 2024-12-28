@@ -10,6 +10,7 @@ import SimpleAnalytics
 
 struct SearchView: View {
     @StateObject private var viewModel: AddCourseViewModel = AddCourseViewModel()
+    
     @State var isLoading = true
     @State var searchText: String = ""
     @State var selectedSemester: Int? = nil
@@ -17,14 +18,9 @@ struct SearchView: View {
     @State var courses: [FirestoreCourse] = []
     @State var filteredCourses: [FirestoreCourse] = []
     @State var semesterStrings: [String] = []
-    @State var isRecommendationsPopUpShown: Bool = false
-    @State var recommendationPopup: Recommendation?
     let dateformatter = DateFormatter()
-    let viewContext = PersistenceController.shared.container.viewContext
     
     @State var isOnboardingIsShown: Bool = false
-    
-    @AppStorage("BVersionRecommendations") private var bVersion = false
     
     @FetchRequest(
         entity: Recommendation.entity(),
@@ -41,11 +37,6 @@ struct SearchView: View {
             ScrollView {
                 VStack(alignment: .leading) {
                     searchFilter
-                    
-                    if(bVersion && searchText.isEmpty && selectedCategory == nil && selectedSemester == nil) {
-                        recommendationsView
-                            .padding(.top, 16)
-                    }
                     
                     if(searchText.isEmpty && selectedCategory == nil && selectedSemester == nil) {
                         Text("All Courses")
@@ -238,141 +229,6 @@ struct SearchView: View {
                     }
                     .cornerRadius(20)
                 }
-            }
-        }
-    }
-    
-    var recommendationsView: some View {
-        VStack(alignment: .leading) {
-            Text("Recommendations")
-                .font(.system(size: 20, weight: .semibold))
-            
-            Text("Unsure how you want to plan your upcoming semesters? Generate course suggestions based on your interests.")
-                .font(.system(size: 17, weight: .semibold))
-                .multilineTextAlignment(.leading)
-                .foregroundStyle(Color(UIColor.systemGray2))
-            
-            ZStack {
-                Color("Color1")
-                
-                HStack {
-                    ZStack {
-                        Color(.white)
-                        Image(systemName: "sparkles")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(Color("Color1"))
-                    }
-                    .frame(width: 30, height: 30)
-                    .cornerRadius(10)
-                    
-                    Text("Generate Study Plan")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.white)
-                    
-                    Spacer()
-                    
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
-                .padding(.horizontal, 12)
-            }
-            .frame(height: 54)
-            .cornerRadius(15)
-            .onTapGesture {
-                isOnboardingIsShown = true
-            }
-            
-            HStack {
-                Spacer()
-                Text("Previously Generated")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(Color(UIColor.systemGray2))
-                
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(Color(UIColor.systemGray2))
-                Spacer()
-            }
-            .onTapGesture {
-                isRecommendationsPopUpShown = true
-            }
-            .sheet(isPresented: $isRecommendationsPopUpShown) {
-                NavigationStack {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 7) {
-                            ForEach(recommendations, id: \.self) { recommendation in
-                                Button {
-                                    if recommendationPopup != recommendation {
-                                        recommendationPopup = recommendation
-                                    }
-                                } label: {
-                                    ZStack {
-                                        Color(UIColor.secondarySystemGroupedBackground)
-                                        
-                                        HStack(spacing: 10) {
-                                            ZStack {
-                                                Color(Color("Color1"))
-                                                Image(systemName: "tray.full.fill")
-                                                    .font(.system(size: 21, weight: .semibold))
-                                                    .foregroundStyle(.white)
-                                            }
-                                            .frame(width: 39, height: 39)
-                                            .cornerRadius(10)
-                                            
-                                            VStack(alignment: .leading, spacing: -1) {
-                                                Text("\(recommendation.amountOfSemesters) Semesters")
-                                                    .foregroundStyle(Color(UIColor.label))
-                                                    .font(.system(size: 21, weight: .semibold))
-                                                
-                                                Text("\(dateformatter.string(from: Date()))")
-                                                    .foregroundStyle(Color(UIColor.systemGray2))
-                                                    .font(.system(size: 16, weight: .medium))
-                                            }
-                                            
-                                            Spacer()
-                                            
-                                            Image(systemName: "chevron.right")
-                                                .font(.system(size: 20, weight: .semibold))
-                                                .foregroundStyle(Color(UIColor.systemGray3))
-                                        }
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 8)
-                                    }
-                                    .cornerRadius(15)
-                                }
-                                .contextMenu {
-                                    Button {
-                                        viewContext.delete(recommendation)
-                                        
-                                        do {
-                                            try viewContext.save()
-                                        } catch {
-                                            print("\(error)")
-                                        }
-                                    } label: {
-                                        Label("Delete", systemImage: "trash.fill")
-                                    }
-                                }
-                                .sheet(item: $recommendationPopup) { recommendation in
-                                    RecommendationsSemesterView(recommendation: $recommendationPopup)
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                    }
-                    .toolbar {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(Color(UIColor.systemGray3))
-                            .onTapGesture {
-                                isRecommendationsPopUpShown = false
-                            }
-                    }
-                    .navigationTitle("Recommendations")
-                }
-            }
-            .onAppear {
-                dateformatter.dateFormat = "MM/dd/YYYY"
             }
         }
     }

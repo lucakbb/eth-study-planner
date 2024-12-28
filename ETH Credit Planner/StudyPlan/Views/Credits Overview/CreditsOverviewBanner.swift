@@ -117,6 +117,7 @@ struct CreditsOverviewBanner: View {
                     Spacer()
                     
                     Image(systemName: "chevron.right")
+                        .foregroundStyle(.white)
                         .font(.system(size: 18, weight: .semibold))
                         .padding(.trailing, 5)
                 }

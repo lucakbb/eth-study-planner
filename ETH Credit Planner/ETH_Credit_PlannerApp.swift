@@ -11,7 +11,6 @@ import FirebaseCore
 @main
 struct ETH_Credit_PlannerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    
     let persistenceController = PersistenceController.shared
 
     var body: some Scene {

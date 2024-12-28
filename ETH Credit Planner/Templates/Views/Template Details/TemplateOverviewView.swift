@@ -80,7 +80,7 @@ struct TemplateOverviewView: View {
                                 
                                 Spacer()
                                 
-                                ShareLink(item: "#\(template.shareCode)") {
+                                ShareLink(item: URL(string: "https://share.studyplanner.ch?template-id=\(template.shareCode)")!) {
                                     Image(systemName: "square.and.arrow.up")
                                         .font(.system(size: 20, weight: .semibold))
                                         .foregroundStyle(Color("Color3"))

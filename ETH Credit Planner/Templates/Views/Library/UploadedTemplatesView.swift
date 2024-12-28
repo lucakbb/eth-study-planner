@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct UploadedTemplatesView: View {
+    @ObservedObject var viewModel: UploadedTemplateViewModel = UploadedTemplateViewModel()
+    
+    @Binding var isUploadedTemplatesShown: Bool
+    
     @State var isCreatePopUpShown: Bool = false
     @State var isLoading: Bool = false
     @State var uploadedTemplates: [Template] = []
@@ -15,10 +19,6 @@ struct UploadedTemplatesView: View {
     @State var templateToDelete: Template? = nil
     @State var isImportAlertShown: Bool = false
     @State var studyPlan: [[FirestoreCourse]] = []
-    @Binding var isUploadedTemplatesShown: Bool
-    @ObservedObject var viewModel: UploadedTemplateViewModel = UploadedTemplateViewModel()
-    
-    @AppStorage("BVersionTemplates") private var bVersion = false
     
     var body: some View {
         NavigationStack {
@@ -57,15 +57,6 @@ struct UploadedTemplatesView: View {
                     }) {
                         CreateTemplateView(courses: studyPlan, isPresented: $isCreatePopUpShown)
                     }
-                }
-                
-                if(bVersion) {
-                    VStack {
-                        Spacer()
-                        
-                        ChangeTemplatesViewButton(isUploadedTemplatesShown: $isUploadedTemplatesShown)
-                    }
-                    .padding(.bottom, 15)
                 }
             }
             .background(Color(UIColor.systemGroupedBackground))

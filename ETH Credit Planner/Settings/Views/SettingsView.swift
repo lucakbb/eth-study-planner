@@ -26,9 +26,6 @@ struct SettingsView: View {
     @State var amountOfSemesters: Int = 0
     @State var isDeleteSemesterAlertShown: Bool = false
     
-    @State var amountOfClicks: Int = 0
-    @State var isABPopupShown: Bool = false
-    
     @State var isICloudSyncEnabled: Bool = CloudKitPreferencesManager.shared.getICloudSync()
     
     @FetchRequest(
@@ -37,7 +34,7 @@ struct SettingsView: View {
     ) var semesters: FetchedResults<Semester>
     
     let viewContext = PersistenceController.shared.container.viewContext
-    let settings = [SettingsEntry(name: "Support", image: "mail.fill", color: UIColor(Color("Color1"))), SettingsEntry(name: "Review App", image: "star.fill", color: UIColor.systemYellow), SettingsEntry(name: "Legal Notice", image: "book.closed.fill", color: UIColor.gray), SettingsEntry(name: "Privacy Policy", image: "lock.fill", color: UIColor.gray)]
+    let settings = [SettingsEntry(name: "Support", image: "mail.fill", color: UIColor(Color("Color1"))), SettingsEntry(name: "GitHub", image: "chevron.left.forwardslash.chevron.right", color: UIColor(Color("Color2"))), SettingsEntry(name: "Review App", image: "star.fill", color: UIColor.systemYellow), SettingsEntry(name: "Legal Notice", image: "book.closed.fill", color: UIColor.gray), SettingsEntry(name: "Privacy Policy", image: "lock.fill", color: UIColor.gray)]
     
     var body: some View {
         NavigationStack {
@@ -48,9 +45,7 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .onAppear {
                 amountOfSemesters = semesters.count
-            }
-            .sheet(isPresented: $isABPopupShown) {
-                ABVersionSettings(isPresented: $isABPopupShown)
+                isICloudSyncEnabled = CloudKitPreferencesManager.shared.getICloudSync()
             }
         }
     }
@@ -123,7 +118,7 @@ struct SettingsView: View {
                 }
             }
             
-            Section {
+            Section(footer: Text("Set the number of semesters to be displayed in the study Plan.")) {
                 HStack(spacing: 13) {
                     ZStack {
                         Color(Color("Color3"))
@@ -167,7 +162,7 @@ struct SettingsView: View {
                 .contentShape(Rectangle())
             }
             
-            Section {
+            Section(footer: Text("Activate to synchronize your study plan via iCloud between your devices.")) {
                 HStack(spacing: 13) {
                     ZStack {
                         Color(Color("Color7"))
@@ -186,7 +181,7 @@ struct SettingsView: View {
                     Toggle("iCloud Synchronisierung", isOn: $isICloudSyncEnabled)
                         .labelsHidden()
                         .onChange(of: isICloudSyncEnabled) {
-                            PersistenceController.toggleICloudSync(enabled: isICloudSyncEnabled)
+                            PersistenceController.shared.toggleICloudSync(enabled: isICloudSyncEnabled)
                         }
 
                 }
@@ -197,6 +192,8 @@ struct SettingsView: View {
                 .contentShape(Rectangle())
             }
             
+            
+            
             Section {
                 ForEach(settings, id: \.self) { entry in
                     SettingsEntryView(entry: entry)
@@ -205,6 +202,8 @@ struct SettingsView: View {
                         .onTapGesture {
                             if(entry.name == "Support") {
                                 openURL(URL(string: "https://sable-perfume-44c.notion.site/147e068d9afc8012b229daac3caecf29?pvs=105")!)
+                            } else if(entry.name == "GitHub") {
+                                openURL(URL(string: "https://github.com/lucakbb/eth-study-planner")!)
                             } else if(entry.name == "Review App") {
                                 viewModel.writeReview()
                             } else if(entry.name == "Legal Notice") {
@@ -264,13 +263,6 @@ struct SettingsView: View {
                     }
                     
                     Spacer()
-                }
-                .onTapGesture {
-                    amountOfClicks += 1
-                    
-                    if(amountOfClicks >= 7) {
-                        isABPopupShown = true
-                    }
                 }
             }
         }

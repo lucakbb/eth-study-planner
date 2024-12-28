@@ -6,57 +6,103 @@
 //
 
 import CoreData
+import CloudKit
 
-class PersistenceController {
-    static private var _shared: PersistenceController?
-    static var shared: PersistenceController {
-        if _shared == nil {
-            _shared = PersistenceController()
+class PersistenceController: ObservableObject {
+    static let shared = PersistenceController()
+
+    private var cloudOptionsToKeep: NSPersistentCloudKitContainerOptions? = nil
+    
+    lazy var container: NSPersistentContainer = {
+        return createContainer()
+    }()
+    
+    private func createContainer() -> NSPersistentContainer {
+        let useCloudSync = CloudKitPreferencesManager.shared.getICloudSync()
+        let modelURL = Bundle.main.url(forResource: "ETH_Credit_Planner", withExtension: "momd")!
+        let model = NSManagedObjectModel(contentsOf: modelURL)!
+        
+        let newContainer = useCloudSync ? NSPersistentCloudKitContainer(name: "ETH_Credit_Planner", managedObjectModel: model)
+                                     : NSPersistentContainer(name: "ETH_Credit_Planner", managedObjectModel: model)
+        
+        guard let description = newContainer.persistentStoreDescriptions.first else {
+            fatalError("No description found")
         }
-        return _shared!
+        
+        if useCloudSync {
+            let options = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.hci.ETHCreditPlanner")
+            description.cloudKitContainerOptions = options
+            newContainer.viewContext.automaticallyMergesChangesFromParent = true
+            newContainer.viewContext.mergePolicy = NSMergeByPropertyStoreTrumpMergePolicy
+        } else {
+            description.cloudKitContainerOptions = nil
+        }
+        
+        description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+        description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+        
+        newContainer.loadPersistentStores { (storeDescription, error) in
+            if let error = error as NSError? {
+                fatalError("Unresolved error \(error), \(error.userInfo)")
+            }
+        }
+        
+        return newContainer
     }
 
-    let container: NSPersistentContainer
-
-    init(inMemory: Bool = false) {
+    private func setupContainer() {
         let useCloudSync = CloudKitPreferencesManager.shared.getICloudSync()
+                
+        // Save and reset context before detaching stores
+        saveContext()
+        container.viewContext.reset()
+        
+        let coordinator = container.persistentStoreCoordinator
+        
+        for store in coordinator.persistentStores {
+            do {
+                try coordinator.remove(store)
+            } catch {
+                fatalError("Error removing store: \(error)")
+            }
+        }
+
+        guard let description = container.persistentStoreDescriptions.first else {
+            fatalError("Could not create or retrieve persistent container")
+        }
 
         if useCloudSync {
-            let cloudContainer = NSPersistentCloudKitContainer(name: "ETH_Credit_Planner")
-            if let description = cloudContainer.persistentStoreDescriptions.first {
-                description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.hci.ETHCreditPlanner")
-                description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
-                description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+            if let savedOptions = cloudOptionsToKeep {
+                description.cloudKitContainerOptions = savedOptions
+            } else {
+                let options = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.hci.ETHCreditPlanner")
+                description.cloudKitContainerOptions = options
+                cloudOptionsToKeep = options
             }
-            
-            container = cloudContainer
+
+            container.viewContext.automaticallyMergesChangesFromParent = true
+            container.viewContext.mergePolicy = NSMergeByPropertyStoreTrumpMergePolicy
         } else {
-            container = NSPersistentContainer(name: "ETH_Credit_Planner")
+            description.cloudKitContainerOptions = nil
         }
 
-        if inMemory {
-            container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
-        }
+        description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+        description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
 
-       
         container.loadPersistentStores { (storeDescription, error) in
             if let error = error as NSError? {
-                print("Unresolved error \(error), \(error.userInfo)")
-            } else {
-                print("Persistent Store loaded: \(storeDescription.url?.absoluteString ?? "Unknown URL")")
+                fatalError("Unresolved error \(error), \(error.userInfo)")
             }
         }
-
-        container.viewContext.automaticallyMergesChangesFromParent = true
     }
-    
-    static func toggleICloudSync(enabled: Bool) {
+
+    func toggleICloudSync(enabled: Bool) {
         CloudKitPreferencesManager.shared.setICloudSync(enabled)
 
-        if(enabled) {
+        if enabled {
             NSUbiquitousKeyValueStore.default.set(UserDefaults.standard.bool(forKey: "oldUser"), forKey: "oldUser")
             NSUbiquitousKeyValueStore.default.set(UserDefaults.standard.string(forKey: "userName"), forKey: "userName")
-            
+
             do {
                 let interestsManager = InterestsManager()
                 let interests = interestsManager.loadInterests()
@@ -65,11 +111,35 @@ class PersistenceController {
             } catch {
                 print("Failed to synchronize interests: \(error)")
             }
+        } else {
+            NSUbiquitousKeyValueStore.default.set(false, forKey: "oldUser")
+            NSUbiquitousKeyValueStore.default.set("", forKey: "userName")
+            
+            let container = CKContainer(identifier: "iCloud.com.hci.ETHCreditPlanner")
+            let database = container.privateCloudDatabase
+
+            database.delete(withRecordZoneID: .init(zoneName: "com.apple.coredata.cloudkit.zone"), completionHandler: { (zoneID, error) in
+                if let error = error {
+                    print("deleting zone error \(error.localizedDescription)")
+                }
+            })
         }
-        
-        _shared = PersistenceController()
+
+        setupContainer()
     }
-    
+
+    func saveContext() {
+        let context = container.viewContext
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                let nsError = error as NSError
+                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            }
+        }
+    }
+
     func cleanUpDuplicates() {
         resolveDuplicates(for: "Semester", in: container.viewContext)
         resolveDuplicates(for: "Category", in: container.viewContext)
