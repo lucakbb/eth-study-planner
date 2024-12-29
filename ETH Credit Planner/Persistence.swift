@@ -112,9 +112,6 @@ class PersistenceController: ObservableObject {
                 print("Failed to synchronize interests: \(error)")
             }
         } else {
-            NSUbiquitousKeyValueStore.default.set(false, forKey: "oldUser")
-            NSUbiquitousKeyValueStore.default.set("", forKey: "userName")
-            
             let container = CKContainer(identifier: "iCloud.com.hci.ETHCreditPlanner")
             let database = container.privateCloudDatabase
 
@@ -218,8 +215,8 @@ class PersistenceController: ObservableObject {
                 return courses1.count > courses2.count
             }
             
-            let passedCount1 = courses1.filter { ($0.value(forKey: "isPassed") as? Bool) == true }.count
-            let passedCount2 = courses2.filter { ($0.value(forKey: "isPassed") as? Bool) == true }.count
+            let passedCount1 = courses1.filter { ($0.value(forKey: "status") as? String) == CourseStatus.passed.rawValue }.count
+            let passedCount2 = courses2.filter { ($0.value(forKey: "status") as? String) == CourseStatus.passed.rawValue }.count
             
             if passedCount1 != passedCount2 {
                 return passedCount1 > passedCount2

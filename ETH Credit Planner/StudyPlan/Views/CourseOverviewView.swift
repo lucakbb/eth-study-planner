@@ -16,7 +16,7 @@ struct CourseOverviewView: View {
     @Environment(\.dismiss) private var dismiss
     @State var course: Course?
     
-    @State var isPassed: Bool = false
+    @State var courseStatus: CourseStatus = .planned
     @State private var selectedRating: Int? = nil
     
     @State var isReviewsSheetShown: Bool = false
@@ -28,6 +28,8 @@ struct CourseOverviewView: View {
                 links
                 
                 general
+                
+                status
                 
                 rating
                 
@@ -60,7 +62,7 @@ struct CourseOverviewView: View {
         .background(Color(UIColor.systemGroupedBackground))
         .navigationTitle("Course Overview")
         .onAppear {
-            self.isPassed = course?.isPassed ?? false
+            self.courseStatus = CourseStatus(rawValue: course?.status ?? CourseStatus.planned.rawValue) ?? .planned
             self.selectedRating = Int(course?.rating ?? -1)
             
             SimpleAnalytics.shared.track(path: ["study-plan", "course-overview"])
@@ -140,7 +142,8 @@ struct CourseOverviewView: View {
                     isReviewsSheetShown = true
                 }
                 .sheet(isPresented: $isReviewsSheetShown) {
-                    if let url = URL(string: "https://n.ethz.ch/~lteufelbe/coursereview/?course=\(course?.id ?? "")") {
+                    let courseMainID = course?.id?.split(separator: "&&").first.map(String.init) ?? course?.id
+                    if let url = URL(string: "https://n.ethz.ch/~lteufelbe/coursereview/?course=\(courseMainID ?? "")") {
                         SafariView(url: url)
                     }
                 }
@@ -207,35 +210,116 @@ struct CourseOverviewView: View {
                     }
                     .padding(.horizontal, 10)
                     .padding(.bottom, 10)
-                    
-                    HStack {
-                        Image(systemName: isPassed == true ? "checkmark.circle.fill" : "circle")
-                            .font(.system(size: 23, weight: .semibold))
-                            .foregroundStyle(Color("Color1"))
-                        Text("Passed")
-                            .font(.system(size: 23, weight: .semibold))
-                    }
-                    .padding(.bottom, 15)
-                    .onTapGesture {
-                        let generator = UIImpactFeedbackGenerator(style: .heavy)
-                        generator.impactOccurred()
-                        
-                        if let course = course {
-                            isPassed.toggle()
-                            course.isPassed.toggle()
-                        }
-                        
-                        do {
-                            try viewContext.save()
-                        } catch {
-                            print(error)
-                        }
-                    }
                 }
             }
             .cornerRadius(10)
         }
     }
+    
+    var status: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Status")
+                .font(.system(size: 20, weight: .bold))
+                .padding(.bottom, -5)
+            
+            HStack {
+                ZStack {
+                    courseStatus == CourseStatus.planned ? Color("Color1") : Color(UIColor.secondarySystemGroupedBackground)
+                    
+                    VStack(spacing: 5) {
+                        Image(systemName: "clock.fill")
+                            .font(.system(size: 21, weight: .semibold))
+                            .foregroundStyle(courseStatus == CourseStatus.planned ? .white : Color(UIColor.lightGray))
+                        Text("Planned")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(courseStatus == CourseStatus.planned ? .white : Color(UIColor.lightGray))
+                    }
+                    .padding(.vertical, 15)
+                }
+                .cornerRadius(10)
+                .onTapGesture {
+                    let generator = UIImpactFeedbackGenerator(style: .heavy)
+                    generator.impactOccurred()
+                    
+                    if let course = course {
+                        courseStatus = .planned
+                        course.status = CourseStatus.planned.rawValue
+                    }
+                    
+                    do {
+                        try viewContext.save()
+                    } catch {
+                        print(error)
+                    }
+                }
+                
+                Spacer()
+                
+                ZStack {
+                    courseStatus == CourseStatus.passed ? Color("Color1") : Color(UIColor.secondarySystemGroupedBackground)
+                    
+                    VStack(spacing: 5) {
+                        Image(systemName: "medal.fill")
+                            .font(.system(size: 21, weight: .semibold))
+                            .foregroundStyle(courseStatus == CourseStatus.passed ? .white : Color(UIColor.lightGray))
+                        Text("Passed")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(courseStatus == CourseStatus.passed ? .white : Color(UIColor.lightGray))
+                    }
+                    .padding(.vertical, 15)
+                }
+                .cornerRadius(10)
+                .onTapGesture {
+                    let generator = UIImpactFeedbackGenerator(style: .heavy)
+                    generator.impactOccurred()
+                    
+                    if let course = course {
+                        courseStatus = .passed
+                        course.status = CourseStatus.passed.rawValue
+                    }
+                    
+                    do {
+                        try viewContext.save()
+                    } catch {
+                        print(error)
+                    }
+                }
+                
+                Spacer()
+                
+                ZStack {
+                    courseStatus == CourseStatus.failed ? Color("Color8") : Color(UIColor.secondarySystemGroupedBackground)
+                    
+                    VStack(spacing: 5) {
+                        Image(systemName: "xmark.diamond.fill")
+                            .font(.system(size: 21, weight: .semibold))
+                            .foregroundStyle(courseStatus == CourseStatus.failed ? .white : Color(UIColor.lightGray))
+                        Text("Failed")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(courseStatus == CourseStatus.failed ? .white : Color(UIColor.lightGray))
+                    }
+                    .padding(.vertical, 15)
+                }
+                .cornerRadius(10)
+                .onTapGesture {
+                    let generator = UIImpactFeedbackGenerator(style: .heavy)
+                    generator.impactOccurred()
+                    
+                    if let course = course {
+                        courseStatus = .failed
+                        course.status = CourseStatus.failed.rawValue
+                    }
+                    
+                    do {
+                        try viewContext.save()
+                    } catch {
+                        print(error)
+                    }
+                }
+            }
+        }
+    }
+        
     
     var rating: some View {
         VStack(alignment: .leading, spacing: 10) {

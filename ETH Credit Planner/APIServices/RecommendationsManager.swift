@@ -68,6 +68,7 @@ class RecommendationsManager {
     
     func fetchAllCourses() -> [Course] {
         let fetchRequest: NSFetchRequest<Course> = Course.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "status != %@", CourseStatus.failed.rawValue)
         
         do {
             return try viewContext.fetch(fetchRequest)
@@ -145,8 +146,16 @@ class RecommendationsManager {
     }
 
     func removeAlreadyTaken(toEdit: [RecommendationsCourse], planned: [RecommendationsCourse]) -> [RecommendationsCourse] {
-        let plannedIDs = Set(planned.map { $0.id })
-        return toEdit.filter { !plannedIDs.contains($0.id) }
+        let plannedIDs = Set(planned.compactMap { course in
+            course.id.split(separator: "&&").first.map(String.init)
+        })
+        
+        
+        return toEdit.filter { course in
+            let mainID = course.id.split(separator: "&&").first.map(String.init) ?? course.id
+            
+            return !plannedIDs.contains(mainID)
+        }
     }
 
     // MARK: - Sort by Priority

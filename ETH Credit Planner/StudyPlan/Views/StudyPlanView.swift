@@ -194,7 +194,7 @@ struct CategoryView: View {
                       
                         
                         // filter courses for status
-                        let passedCourses = courses.filter { $0.isPassed }
+                        let passedCourses = courses.filter { $0.status == CourseStatus.passed.rawValue }
                         
                         // calculate credits
                         let passedCredits = passedCourses.reduce(0) { $0 + $1.credits }

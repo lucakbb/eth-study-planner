@@ -10,6 +10,8 @@ import SimpleAnalytics
 import CoreData
 
 struct ChangelogView: View {
+    @StateObject var viewModel: ChangelogViewModel = ChangelogViewModel()
+    
     @Binding var isPresented: Bool
     @State var isGithubLinkShown: Bool = false
     
@@ -19,17 +21,6 @@ struct ChangelogView: View {
                     Color("Color1")
                     
                     VStack {
-                        HStack {
-                            Spacer()
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.white)
-                                .font(.system(size: 23))
-                                .padding()
-                                .onTapGesture {
-                                    isPresented = false
-                                }
-                        }
-                        
                         Spacer()
                         
                         HStack {
@@ -41,7 +32,7 @@ struct ChangelogView: View {
                         }
                     }
                 }
-                .frame(height: 150)
+                .frame(height: 170)
                 
                 ScrollView(.vertical) {
                     VStack {
@@ -72,8 +63,8 @@ struct ChangelogView: View {
                                     Text("\u{2022} The app is now also available on iPad and Mac.")
                                     Text("\u{2022} Your study plan can now be transferred to multiple devices via iCloud. To do this, activate “iCloud Sync” in the settings.")
                                     Text("\u{2022} Courses, such as Soccer Analytics, which are offered in two categories, are now listed for each of these categories.")
+                                    Text("\u{2022} Courses can now be marked as failed and added to multiple semesters.")
                                     Text("\u{2022} Added the ability to share templates via a direct link.")
-                                    Text("\u{2022} When adding a course, it is now easier to see if it is not offered in a semester.")
                                 }
                                 .padding(.bottom)
                                 .padding(.horizontal)
@@ -143,51 +134,43 @@ struct ChangelogView: View {
                 
                 ZStack {
                     Color("Color1")
-                    Text("Continue")
-                        .foregroundStyle(.white)
-                        .font(.system(size: 20, weight: .semibold))
+                    
+                    if(!viewModel.isLoading) {
+                        Text("Continue")
+                            .foregroundStyle(.white)
+                            .font(.system(size: 20, weight: .semibold))
+                            .padding(12)
+                    } else {
+                        HStack {
+                            ProgressView()
+                            Text("Loading")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
                         .padding(12)
+                    }
+                    
                 }
                 .frame(height: 54)
                 .cornerRadius(15)
                 .padding(.horizontal)
+                .padding(.bottom, 15)
                 .onTapGesture {
+                    viewModel.updateErgaenzungMaxCredits()
+                    viewModel.migrateCourseStatus()
+                    
+                    SimpleAnalytics.shared.track(event: "dismissedChangelog")
+                    UserDefaults.standard.setValue("1.1", forKey: "currentVersion")
                     isPresented = false
                 }
             }
-            .onDisappear(perform: {
-                UserDefaults.standard.setValue("1.1", forKey: "currentVersion")
-                updateErgaenzungMaxCredits()
-                
-                SimpleAnalytics.shared.track(event: "dismissedChangelog")
-            })
-        
-    }
-    
-    @MainActor
-    func updateErgaenzungMaxCredits() {
-        let viewContext = PersistenceController.shared.container.viewContext
-        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id == 3")
-        
-        do {
-            let categories = try viewContext.fetch(fetchRequest)
-            
-            if(categories.count == 1) {
-                let category = categories[0]
-                category.maxCredits = 10
-                
-                try viewContext.save()
-            }
-        } catch {
-            print("error: \(error)")
-        }
+            .ignoresSafeArea(edges: .top)
     }
 }
 
 #Preview {
     Text("Hello, world!")
-        .sheet(isPresented: .constant(true)) {
+        .fullScreenCover(isPresented: .constant(true)) {
             ChangelogView(isPresented: .constant(true))
         }
 }

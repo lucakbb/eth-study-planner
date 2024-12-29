@@ -23,6 +23,7 @@ class AddCustomCourseViewModel: ObservableObject {
         course.semester = selectedSemester
         course.rating = -1
         course.vvz = ""
+        course.status = CourseStatus.planned.rawValue
         course.id = ""
         
         do {

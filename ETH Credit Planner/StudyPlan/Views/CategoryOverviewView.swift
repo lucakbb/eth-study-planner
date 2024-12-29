@@ -15,6 +15,8 @@ struct CategoryOverviewView: View {
     @State var category: Category?
     @State var isAddCoursePopupShown: Bool = false
     
+    @State var filteredCourses: [Course] = []
+    
     init(category: Category?) {
         self.category = category
         self._courses = FetchRequest<Course>(
@@ -24,11 +26,11 @@ struct CategoryOverviewView: View {
     }
     
     var creditsEarned: Int {
-        courses.filter { $0.isPassed }.reduce(0) { $0 + Int($1.credits) }
+        filteredCourses.filter { $0.status == CourseStatus.passed.rawValue }.reduce(0) { $0 + Int($1.credits) }
     }
 
     var creditsPlanned: Int {
-        courses.filter { !$0.isPassed }.reduce(0) { $0 + Int($1.credits) }
+        filteredCourses.filter { $0.status == CourseStatus.planned.rawValue }.reduce(0) { $0 + Int($1.credits) }
     }
     
     var body: some View {
@@ -59,6 +61,8 @@ struct CategoryOverviewView: View {
             AddCourseView(isPresented: $isAddCoursePopupShown, selectedCategory: category)
         }
         .onAppear {
+            filteredCourses = CourseFilter.shared.filterCourses(Array(courses))
+            
             SimpleAnalytics.shared.track(path: ["study-plan", "category"])
         }
     }
@@ -127,7 +131,7 @@ struct CategoryOverviewView: View {
                     }
                     
                     VStack {
-                        Text("\(min(creditsEarned, Int(category?.maxCredits ?? 0)))")
+                        Text("\(min(creditsPlanned + creditsEarned, Int(category?.maxCredits ?? 0)))")
                             .font(.system(size: 30, weight: .bold))
                         Text("out of \(category?.minCredits ?? 0)")
                             .font(.system(size: 20, weight: .semibold))
@@ -152,12 +156,16 @@ struct CategoryOverviewView: View {
                     Color(UIColor.secondarySystemGroupedBackground)
                     
                     HStack {
-                        if(!course.isPassed) {
+                        if(course.status == CourseStatus.planned.rawValue) {
                             Image(systemName: "clock.fill")
                                 .font(.system(size: 20, weight: .semibold))
-                        } else {
+                        } else if(course.status == CourseStatus.passed.rawValue) {
                             Image(systemName: "medal.fill")
                                 .font(.system(size: 20, weight: .semibold))
+                        } else {
+                            Image(systemName: "xmark.diamond.fill")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(Color("Color8"))
                         }
                         
                         Text(course.name ?? "")

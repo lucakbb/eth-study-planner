@@ -22,7 +22,7 @@ struct AddCourseView: View {
     @FetchRequest(
         entity: Course.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Course.id, ascending: true)],
-        predicate: NSPredicate(format: "isPassed == true")
+        predicate: NSPredicate(format: "status == %@", CourseStatus.passed.rawValue)
     ) var passedCourses: FetchedResults<Course>
     
     @Binding var isPresented: Bool
@@ -95,10 +95,17 @@ struct AddCourseView: View {
                 
                 filteredCourses.sort { $0.category < $1.category }
                 filteredCourses = filteredCourses.filter { filteredCourse in
-                    let hasMatchingPrefix = passedCourses.contains { course in
-                        return course.name == filteredCourse.name
+                    // Check if there is a passedCourse with the same main ID (part before "&&")
+                    let hasMatchingPrefix = passedCourses.contains { passedCourse in
+                        // Extract the main ID (part before "&&") for both courses
+                        let filteredCourseMainID = filteredCourse.id.split(separator: "&&").first.map(String.init) ?? filteredCourse.id
+                        let passedCourseMainID = passedCourse.id?.split(separator: "&&").first.map(String.init) ?? passedCourse.id
+                        
+                        // Compare the main IDs
+                        return filteredCourseMainID == passedCourseMainID
                     }
                     
+                    // Keep the course if no matching passedCourse is found
                     return !hasMatchingPrefix
                 }
             }
@@ -116,14 +123,17 @@ struct AddCourseView: View {
                         
                         filteredCourses.sort { $0.category < $1.category }
                         filteredCourses = filteredCourses.filter { filteredCourse in
-                            let hasMatchingPrefix = passedCourses.contains { course in
-                                return course.name == filteredCourse.name
+                            // Check if there is a passedCourse with the same main ID (part before "&&")
+                            let hasMatchingPrefix = passedCourses.contains { passedCourse in
+                                // Extract the main ID (part before "&&") for both courses
+                                let filteredCourseMainID = filteredCourse.id.split(separator: "&&").first.map(String.init) ?? filteredCourse.id
+                                let passedCourseMainID = passedCourse.id?.split(separator: "&&").first.map(String.init) ?? passedCourse.id
+                                
+                                // Compare the main IDs
+                                return filteredCourseMainID == passedCourseMainID
                             }
                             
-                            if(hasMatchingPrefix) {
-                                print(filteredCourse.name)
-                            }
-                            
+                            // Keep the course if no matching passedCourse is found
                             return !hasMatchingPrefix
                         }
                         
@@ -162,16 +172,20 @@ struct AddCourseView: View {
                             
                             filteredCourses.sort { $0.category < $1.category }
                             filteredCourses = filteredCourses.filter { filteredCourse in
-                                let hasMatchingPrefix = passedCourses.contains { course in
-                                    return course.name == filteredCourse.name
+                                // Check if there is a passedCourse with the same main ID (part before "&&")
+                                let hasMatchingPrefix = passedCourses.contains { passedCourse in
+                                    // Safely extract the main ID (part before "&&") for both courses
+                                    let filteredCourseMainID = filteredCourse.id.split(separator: "&&").first.map(String.init) ?? filteredCourse.id
+                                    let passedCourseMainID = passedCourse.id?.split(separator: "&&").first.map(String.init) ?? passedCourse.id
+                                    
+                                    // Compare the main IDs, ensuring nil-safe comparison
+                                    return filteredCourseMainID == passedCourseMainID
                                 }
                                 
-                                if(hasMatchingPrefix) {
-                                    print(filteredCourse.name)
-                                }
-                                
+                                // Keep the course if no matching passedCourse is found
                                 return !hasMatchingPrefix
                             }
+
                         } label: {
                             Text(category.name ?? "")
                         }
@@ -191,16 +205,20 @@ struct AddCourseView: View {
                         
                         filteredCourses.sort { $0.category < $1.category }
                         filteredCourses = filteredCourses.filter { filteredCourse in
-                            let hasMatchingPrefix = passedCourses.contains { course in
-                                return course.name == filteredCourse.name
+                            // Check if there is a passedCourse with the same main ID (part before "&&")
+                            let hasMatchingPrefix = passedCourses.contains { passedCourse in
+                                // Safely extract the main ID (part before "&&") for both courses
+                                let filteredCourseMainID = filteredCourse.id.split(separator: "&&").first.map(String.init) ?? filteredCourse.id
+                                let passedCourseMainID = passedCourse.id?.split(separator: "&&").first.map(String.init) ?? passedCourse.id
+                                
+                                // Compare the main IDs, ensuring nil-safe comparison
+                                return filteredCourseMainID == passedCourseMainID
                             }
                             
-                            if(hasMatchingPrefix) {
-                                print(filteredCourse.name)
-                            }
-                            
+                            // Keep the course if no matching passedCourse is found
                             return !hasMatchingPrefix
                         }
+
                     } label: {
                         Text("All Courses")
                     }
@@ -245,14 +263,17 @@ struct AddCourseView: View {
                                 
                                 filteredCourses.sort { $0.category < $1.category }
                                 filteredCourses = filteredCourses.filter { filteredCourse in
-                                    let hasMatchingPrefix = passedCourses.contains { course in
-                                        return course.name == filteredCourse.name
+                                    // Check if there is a passedCourse with the same main ID (part before "&&")
+                                    let hasMatchingPrefix = passedCourses.contains { passedCourse in
+                                        // Extract the main ID (part before "&&") for both courses
+                                        let filteredCourseMainID = filteredCourse.id.split(separator: "&&").first.map(String.init) ?? filteredCourse.id
+                                        let passedCourseMainID = passedCourse.id?.split(separator: "&&").first.map(String.init) ?? passedCourse.id
+                                        
+                                        // Compare the main IDs
+                                        return filteredCourseMainID == passedCourseMainID
                                     }
                                     
-                                    if(hasMatchingPrefix) {
-                                        print(filteredCourse.name)
-                                    }
-                                    
+                                    // Keep the course if no matching passedCourse is found
                                     return !hasMatchingPrefix
                                 }
                                 

@@ -34,6 +34,9 @@ struct CreditsOverviewView: View {
         predicate: NSPredicate(format: "category.id == 4")
     ) var electives: FetchedResults<Course>
     
+    @State var filteredCourses: [Course] = []
+    @State var isCreditCalculationShown: Bool = false
+    
     var creditsEarned: Int {
         var totalCredits = 0
         categories.forEach { category in
@@ -44,7 +47,7 @@ struct CreditsOverviewView: View {
     }
 
     var creditsPlanned: Int {
-        courses.filter { !$0.isPassed }.reduce(0) { $0 + Int($1.credits) }
+        filteredCourses.filter { $0.status == CourseStatus.planned.rawValue }.reduce(0) { $0 + Int($1.credits) }
     }
     
     var basicAndCoreCredits: Int {
@@ -58,9 +61,9 @@ struct CreditsOverviewView: View {
     var earnedCreditsByCategory: [Category: Int] {
         var result = Dictionary(uniqueKeysWithValues: categories.map { ($0, 0) })
         
-        courses.forEach { course in
+        filteredCourses.forEach { course in
             if let category = course.category {
-                if(course.isPassed) {
+                if(course.status == CourseStatus.passed.rawValue) {
                     result[category, default: 0] += Int(course.credits)
                 }
             }
@@ -72,7 +75,7 @@ struct CreditsOverviewView: View {
     var creditsByCategory: [Category: Int] {
         var result = Dictionary(uniqueKeysWithValues: categories.map { ($0, 0) })
         
-        courses.forEach { course in
+        filteredCourses.forEach { course in
             if let category = course.category {
                 result[category, default: 0] += Int(course.credits)
             }
@@ -144,7 +147,30 @@ struct CreditsOverviewView: View {
                     }
             }
             .onAppear {
+                filteredCourses = CourseFilter.shared.filterCourses(Array(courses))
+                
                 SimpleAnalytics.shared.track(path: ["study-plan", "credit-overview"])
+            }
+            .sheet(isPresented: $isCreditCalculationShown) {
+                NavigationStack {
+                    ScrollView {
+                        VStack(alignment: .leading) {
+                            Text("Courses can have one of three statuses: Planned, Passed, or Failed. \n\nThe overall credit count is calculated by adding the credits of all Planned and Passed courses, while ignoring those of Failed courses. Additionally, if a course is entered multiple times in the study plan, only one instance is considered. The credits from the course with the highest priority status will be used.")
+                                .font(.system(size: 18, weight: .medium))
+                                .padding(.bottom, 15)
+                            Text("Examples")
+                                .font(.system(size: 18, weight: .bold))
+                            Text("\u{2022} If a course is marked Failed in the 1st semester but Planned in the 3rd semester, it will be treated as Planned and the credits for the course will be counted only once.")
+                                .font(.system(size: 18, weight: .medium))
+                            Text("\u{2022} If a course is marked Planned in the 3st and 5st semester, it will be treated as Planned. Again, the credits for the course are added only once.")
+                                .font(.system(size: 18, weight: .medium))
+                        }
+                        .padding(.horizontal, 16)
+                    }
+                    .navigationTitle("Credit Calculation")
+                }
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
             }
         }
     }
@@ -220,6 +246,31 @@ struct CreditsOverviewView: View {
                 }
                 .frame(width: 140, height: 140)
                 .padding(.bottom, -30)
+                
+                ZStack {
+                    Color("Color1")
+                    
+                    HStack {
+                        Image(systemName: "info.circle.fill")
+                            .foregroundStyle(.white)
+                            .font(.system(size: 20, weight: .semibold))
+                        Text("How is this number calculated?")
+                            .foregroundStyle(.white)
+                            .font(.system(size: 17, weight: .semibold))
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .foregroundStyle(.white)
+                            .font(.system(size: 18, weight: .semibold))
+                            .padding(.trailing, 5)
+                    }
+                    .padding(10)
+                    .onTapGesture {
+                        isCreditCalculationShown = true
+                    }
+                }
+                .cornerRadius(15)
             }
             .padding(12)
             

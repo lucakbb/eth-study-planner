@@ -16,10 +16,13 @@ struct CreditsOverviewBanner: View {
     
     @State var hasEnoughCredits: Bool = false
     
+    @State var filteredCourses: [Course] = []
+    
     var creditsByCategory: [Category: Int] {
-        var result = Dictionary(uniqueKeysWithValues: categories.map { ($0, 0) })
+        let uniqueCategories = Set(categories)
+        var result = Dictionary(uniqueKeysWithValues: uniqueCategories.map { ($0, 0) })
         
-        courses.forEach { course in
+        filteredCourses.forEach { course in
             if let category = course.category {
                 result[category, default: 0] += Int(course.credits)
             }
@@ -49,9 +52,9 @@ struct CreditsOverviewBanner: View {
             }
         }
         
-        let basicAndCoreCredits = courses.filter { $0.category?.id == 1 || $0.category?.id == 2 }
+        let basicAndCoreCredits = filteredCourses.filter { $0.category?.id == 1 || $0.category?.id == 2 }
                                          .reduce(0) { $0 + Int($1.credits) }
-        let electiveCredits = courses.filter { $0.category?.id == 4 }
+        let electiveCredits = filteredCourses.filter { $0.category?.id == 4 }
                                      .reduce(0) { $0 + Int($1.credits) }
         
         
@@ -102,6 +105,9 @@ struct CreditsOverviewBanner: View {
                 .padding(10)
             }
             .cornerRadius(15)
+            .onAppear {
+                filteredCourses = CourseFilter.shared.filterCourses(Array(courses))
+            }
         } else {
             ZStack {
                 Color("Color3")
@@ -125,6 +131,9 @@ struct CreditsOverviewBanner: View {
                 .padding(10)
             }
             .cornerRadius(15)
+            .onAppear {
+                filteredCourses = CourseFilter.shared.filterCourses(Array(courses))
+            }
         }
     }
 }

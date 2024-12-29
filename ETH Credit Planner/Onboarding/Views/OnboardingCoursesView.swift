@@ -211,7 +211,11 @@ struct FirstYearCoursesView: View {
                     generator.impactOccurred()
                     
                     for course in courses {
-                        course.isPassed = !isPassed
+                        if(isPassed) {
+                            course.status = CourseStatus.planned.rawValue
+                        } else {
+                            course.status = CourseStatus.passed.rawValue
+                        }
                     }
                     
                     isPassed.toggle()
@@ -401,11 +405,11 @@ struct BasicCoursesView: View {
         if passedCourses.contains(course) {
             passedCourses.remove(course)
             
-            course.isPassed = false
+            course.status = CourseStatus.planned.rawValue
         } else {
             passedCourses.insert(course)
-            
-            course.isPassed = true
+
+            course.status = CourseStatus.passed.rawValue
         }
         
         do {
@@ -419,7 +423,7 @@ struct BasicCoursesView: View {
         if passedCourses.count == courses.count {
             
             for course in passedCourses {
-                course.isPassed = false
+                course.status = CourseStatus.planned.rawValue
             }
             
             passedCourses.removeAll()
@@ -427,7 +431,7 @@ struct BasicCoursesView: View {
             passedCourses = Set(courses)
             
             for course in passedCourses {
-                course.isPassed = true
+                course.status = CourseStatus.passed.rawValue
             }
         }
         

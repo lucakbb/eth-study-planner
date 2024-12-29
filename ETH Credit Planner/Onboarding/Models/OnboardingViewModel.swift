@@ -107,7 +107,6 @@ class OnboardingViewModel: ObservableObject {
                 course.name = firestoreCourse.name
                 course.id = firestoreCourse.id
                 course.credits = Int16(firestoreCourse.credits)
-                course.isPassed = false
                 course.rating = -1
                 
                 if firestoreCourse.category < categories.count {
@@ -123,6 +122,12 @@ class OnboardingViewModel: ObservableObject {
                     course.semester = hasOdd ? semesters[0] : semesters[1]
                 } else {
                     course.semester = hasOdd ? semesters[2] : semesters[3]
+                }
+                
+                if(currentSemester > course.semester?.number ?? -1) {
+                    course.status = CourseStatus.failed.rawValue
+                } else {
+                    course.status = CourseStatus.planned.rawValue
                 }
             }
             

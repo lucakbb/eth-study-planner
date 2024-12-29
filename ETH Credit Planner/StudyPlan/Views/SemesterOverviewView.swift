@@ -64,12 +64,16 @@ struct SemesterOverviewView: View {
                     Color(UIColor.secondarySystemGroupedBackground)
                     
                     HStack {
-                        if(!course.isPassed) {
+                        if(course.status == CourseStatus.planned.rawValue) {
                             Image(systemName: "clock.fill")
                                 .font(.system(size: 20, weight: .semibold))
-                        } else {
+                        } else if(course.status == CourseStatus.passed.rawValue) {
                             Image(systemName: "medal.fill")
                                 .font(.system(size: 20, weight: .semibold))
+                        } else {
+                            Image(systemName: "xmark.diamond.fill")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(Color("Color8"))
                         }
                         
                         Text(course.name ?? "")

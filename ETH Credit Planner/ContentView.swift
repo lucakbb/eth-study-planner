@@ -61,7 +61,7 @@ struct ContentView: View {
                         isChangelogShown = true
                     }
                 }
-                .sheet(isPresented: $isChangelogShown) {
+                .fullScreenCover(isPresented: $isChangelogShown) {
                     ChangelogView(isPresented: $isChangelogShown)
                 }
                 .sheet(item: $sharedTemplate) { template in
@@ -129,7 +129,7 @@ struct ContentView: View {
                         isChangelogShown = true
                     }
                 }
-                .sheet(isPresented: $isChangelogShown) {
+                .fullScreenCover(isPresented: $isChangelogShown) {
                     ChangelogView(isPresented: $isChangelogShown)
                 }
                 .sheet(item: $sharedTemplate) { template in

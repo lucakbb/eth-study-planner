@@ -14,6 +14,8 @@ struct ImportCourseView: View {
     @ObservedObject var viewModel: ImportCourseViewModel = ImportCourseViewModel()
     @Environment(\.dismiss) private var dismiss
     
+    // Fetches all courses.
+    // Used to check if the maximum number of credits for a specific category has been reached.
     @FetchRequest(
         entity: Course.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Course.id, ascending: true)]
@@ -29,7 +31,9 @@ struct ImportCourseView: View {
         sortDescriptors: [NSSortDescriptor(keyPath: \Semester.number, ascending: true)]
     ) var semesters: FetchedResults<Semester>
     
-    @FetchRequest var fetchedCourse: FetchedResults<Course>
+    // Fetches all courses with the same ID that are marked as "passed".
+    // Used to verify if the course can be added again to the planner.
+    @FetchRequest var passedCourse: FetchedResults<Course>
     
     @State var course: FirestoreCourse?
     @State var selectedSemester: Semester?
@@ -41,19 +45,31 @@ struct ImportCourseView: View {
         self.course = course
         self.selectedSemester = semester
         
-        self._fetchedCourse = FetchRequest<Course>(
+        let courseMainID = course?.id.split(separator: "&&").first.map(String.init) ?? course?.id
+        self._passedCourse = FetchRequest<Course>(
             sortDescriptors: [NSSortDescriptor(keyPath: \Course.name, ascending: true)],
-            predicate: NSPredicate(format: "id == %@", course?.id ?? "-1")
+            predicate: NSPredicate(format: "status == %@ AND (id == %@ OR id BEGINSWITH %@)",
+                                   CourseStatus.passed.rawValue,
+                                   course?.id ?? "-1",
+                                   courseMainID ?? "-2")
         )
+        
+        if let semester = semester {
+            viewModel.fetchMatchingCourses(semester: semester, courseID: course?.id ?? "-1")
+        }
     }
     
     init(course: FirestoreCourse?) {
         self.course = course
         self.selectedSemester = nil
         
-        self._fetchedCourse = FetchRequest<Course>(
+        let courseMainID = course?.id.split(separator: "&&").first.map(String.init) ?? course?.id
+        self._passedCourse = FetchRequest<Course>(
             sortDescriptors: [NSSortDescriptor(keyPath: \Course.name, ascending: true)],
-            predicate: NSPredicate(format: "id == %@", course?.id ?? "-1")
+            predicate: NSPredicate(format: "status == %@ AND (id == %@ OR id BEGINSWITH %@)",
+                                   CourseStatus.passed.rawValue,
+                                   course?.id ?? "-1",
+                                   courseMainID ?? "-2")
         )
     }
     
@@ -67,14 +83,16 @@ struct ImportCourseView: View {
                             let credits = categoryCourses.reduce(0) { $0 + Int($1.credits)}
                             let maxCredits = categories[course?.category ?? 0].maxCredits
                             
-                            if(credits >= maxCredits || fetchedCourse.count > 0) {
+                            if(credits >= maxCredits || passedCourse.count > 0) {
                                 VStack(alignment: .leading, spacing: 5) {
                                     if(credits >= maxCredits) {
                                         maxCreditsWarning
                                     }
                                     
-                                    if(fetchedCourse.count > 0) {
-                                        alreadyAddedWarning
+                                    if(viewModel.matchingCoursesInSelectedSemester.count > 0) {
+                                        alreadyAddedToSelectedSemesterWarning
+                                    } else if(passedCourse.count > 0) {
+                                        alreadyPassedWarning
                                     }
                                 }
                             }
@@ -89,11 +107,15 @@ struct ImportCourseView: View {
                     .navigationTitle("Course Overview")
                     
                     // Show Button to change semester only if a semester has already been selected
-                    if(fetchedCourse.count == 0 && selectedSemester != nil) {
+                    if(passedCourse.count == 0 && selectedSemester != nil) {
                         Menu {
                             ForEach(filteredSemesters, id: \.self) { semester in
                                 Button {
                                     selectedSemester = semester
+                                    
+                                    if let selectedSemester = selectedSemester {
+                                        viewModel.fetchMatchingCourses(semester: selectedSemester, courseID: course?.id ?? "-1")
+                                    }
                                 } label: {
                                     Text("\(semester.number + 1). Semester")
                                 }
@@ -106,11 +128,15 @@ struct ImportCourseView: View {
                         .padding(.bottom, 5)
                     }
                     
-                    if(fetchedCourse.count == 0 && selectedSemester == nil) {
+                    if(passedCourse.count == 0 && viewModel.matchingCoursesInSelectedSemester.count == 0 && selectedSemester == nil) {
                         Menu {
                             ForEach(filteredSemesters, id: \.self) { semester in
                                 Button {
                                     selectedSemester = semester
+                                    
+                                    if let selectedSemester = selectedSemester {
+                                        viewModel.fetchMatchingCourses(semester: selectedSemester, courseID: course?.id ?? "-1")
+                                    }
                                 } label: {
                                     Text("\(semester.number + 1). Semester")
                                 }
@@ -129,9 +155,13 @@ struct ImportCourseView: View {
                         }
                     } else {
                         ZStack {
-                            if(fetchedCourse.count > 0) {
+                            if(viewModel.matchingCoursesInSelectedSemester.count > 0) {
                                 Color(UIColor.secondarySystemGroupedBackground)
-                                Text("Already added to \(((fetchedCourse[0].semester?.number ?? 0) + 1)). Semester")
+                                Text("Already in the \(((selectedSemester?.number ?? 0) + 1)). Semester")
+                                    .font(.system(size: 20, weight: .semibold))
+                            } else if(passedCourse.count > 0) {
+                                Color(UIColor.secondarySystemGroupedBackground)
+                                Text("Passed in the \(((passedCourse[0].semester?.number ?? 0) + 1)). Semester")
                                     .font(.system(size: 20, weight: .semibold))
                             } else {
                                 Color("Color1")
@@ -145,7 +175,7 @@ struct ImportCourseView: View {
                         .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
                         .padding(.bottom, 10)
                         .onTapGesture {
-                            if(fetchedCourse.count == 0 && selectedSemester != nil) {
+                            if(passedCourse.count == 0 && viewModel.matchingCoursesInSelectedSemester.count == 0 && selectedSemester != nil) {
                                 if let selectedCourse = course, let semester = selectedSemester {
                                     SimpleAnalytics.shared.track(event: "added course")
                                     
@@ -375,15 +405,36 @@ struct ImportCourseView: View {
         }
     }
     
-    var alreadyAddedWarning: some View {
+    var alreadyAddedToSelectedSemesterWarning: some View {
         ZStack {
-            Color(UIColor.systemRed)
+            Color("Color7")
             
             HStack {
                 Image(systemName: "info.circle.fill")
                     .foregroundStyle(.white)
                     .font(.system(size: 25, weight: .semibold))
-                Text("You have already the course to the \(((fetchedCourse[0].semester?.number ?? 0) + 1)). Semester. Delete the course in this semester to add it to another.")
+                Text("You have already added the course to the selected semester.")
+                    .multilineTextAlignment(.leading)
+                    .foregroundStyle(.white)
+                    .font(.system(size: 15, weight: .semibold))
+                
+                Spacer()
+            }
+            .padding(.leading, 3)
+            .padding(10)
+        }
+        .cornerRadius(15)
+    }
+    
+    var alreadyPassedWarning: some View {
+        ZStack {
+            Color("Color7")
+            
+            HStack {
+                Image(systemName: "info.circle.fill")
+                    .foregroundStyle(.white)
+                    .font(.system(size: 25, weight: .semibold))
+                Text("You have already passed the course in the \(((passedCourse[0].semester?.number ?? 0) + 1)). Semester.")
                     .multilineTextAlignment(.leading)
                     .foregroundStyle(.white)
                     .font(.system(size: 15, weight: .semibold))
@@ -399,7 +450,7 @@ struct ImportCourseView: View {
     
     var maxCreditsWarning: some View {
         ZStack {
-            Color(UIColor.systemRed)
+            Color("Color7")
             
             HStack {
                 Image(systemName: "info.circle.fill")

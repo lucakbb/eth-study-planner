@@ -87,11 +87,19 @@ class CloudKitPreferencesManager {
         
         /// Returns the Bool value for `oldUser`, with a fallback to local storage if iCloud does not have it.
         func getOldUser() -> Bool {
+            print("oldUser: \(UserDefaults.standard.bool(forKey: "oldUser"))")
             if localStore.bool(forKey: Keys.oldUser) {
                 return true
-            } else if let iCloudValue = iCloudStore.object(forKey: Keys.oldUser) as? Bool {
-                localStore.set(iCloudValue, forKey: Keys.oldUser)
-                return iCloudValue
+            } else if getICloudSync() {
+                if let iCloudValue = iCloudStore.object(forKey: Keys.oldUser) as? Bool {
+                    if(iCloudValue) {
+                        localStore.set(iCloudValue, forKey: Keys.oldUser)
+                    }
+                    
+                    return iCloudValue
+                }
+                
+                return false
             } else {
                 return false
             }
@@ -147,10 +155,6 @@ class CloudKitPreferencesManager {
             if let changedKeys = userInfo[NSUbiquitousKeyValueStoreChangedKeysKey] as? [String] {
                 for key in changedKeys {
                     switch key {
-                    case Keys.oldUser:
-                        let newValue = iCloudStore.object(forKey: key) as? Bool
-                        localStore.set(newValue, forKey: key)
-                        
                     case Keys.userName:
                         let newValue = iCloudStore.object(forKey: key) as? String
                         localStore.set(newValue, forKey: key)
