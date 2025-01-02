@@ -222,101 +222,107 @@ struct CourseOverviewView: View {
                 .font(.system(size: 20, weight: .bold))
                 .padding(.bottom, -5)
             
-            HStack {
-                ZStack {
-                    courseStatus == CourseStatus.planned ? Color("Color1") : Color(UIColor.secondarySystemGroupedBackground)
-                    
-                    VStack(spacing: 5) {
-                        Image(systemName: "clock.fill")
-                            .font(.system(size: 21, weight: .semibold))
-                            .foregroundStyle(courseStatus == CourseStatus.planned ? .white : Color(UIColor.lightGray))
-                        Text("Planned")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(courseStatus == CourseStatus.planned ? .white : Color(UIColor.lightGray))
-                    }
-                    .padding(.vertical, 15)
-                }
-                .cornerRadius(10)
-                .onTapGesture {
-                    let generator = UIImpactFeedbackGenerator(style: .heavy)
-                    generator.impactOccurred()
-                    
-                    if let course = course {
-                        courseStatus = .planned
-                        course.status = CourseStatus.planned.rawValue
-                    }
-                    
-                    do {
-                        try viewContext.save()
-                    } catch {
-                        print(error)
-                    }
-                }
+            ZStack {
+                Color(UIColor.secondarySystemGroupedBackground)
                 
-                Spacer()
-                
-                ZStack {
-                    courseStatus == CourseStatus.passed ? Color("Color1") : Color(UIColor.secondarySystemGroupedBackground)
-                    
-                    VStack(spacing: 5) {
-                        Image(systemName: "medal.fill")
-                            .font(.system(size: 21, weight: .semibold))
-                            .foregroundStyle(courseStatus == CourseStatus.passed ? .white : Color(UIColor.lightGray))
-                        Text("Passed")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(courseStatus == CourseStatus.passed ? .white : Color(UIColor.lightGray))
+                HStack {
+                    ZStack {
+                        courseStatus == CourseStatus.planned ? Color("Color1") : Color(UIColor.systemGroupedBackground)
+                        
+                        VStack(spacing: 5) {
+                            Image(systemName: "clock.fill")
+                                .font(.system(size: 21, weight: .semibold))
+                                .foregroundStyle(courseStatus == CourseStatus.planned ? .white : Color(UIColor.lightGray))
+                            Text("Planned")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(courseStatus == CourseStatus.planned ? .white : Color(UIColor.lightGray))
+                        }
+                        .padding(.vertical, 15)
                     }
-                    .padding(.vertical, 15)
+                    .cornerRadius(10)
+                    .onTapGesture {
+                        let generator = UIImpactFeedbackGenerator(style: .heavy)
+                        generator.impactOccurred()
+                        
+                        if let course = course {
+                            courseStatus = .planned
+                            course.status = CourseStatus.planned.rawValue
+                        }
+                        
+                        do {
+                            try viewContext.save()
+                        } catch {
+                            print(error)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    ZStack {
+                        courseStatus == CourseStatus.passed ? Color("Color1") : Color(UIColor.systemGroupedBackground)
+                        
+                        VStack(spacing: 5) {
+                            Image(systemName: "medal.fill")
+                                .font(.system(size: 21, weight: .semibold))
+                                .foregroundStyle(courseStatus == CourseStatus.passed ? .white : Color(UIColor.lightGray))
+                            Text("Passed")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(courseStatus == CourseStatus.passed ? .white : Color(UIColor.lightGray))
+                        }
+                        .padding(.vertical, 15)
+                    }
+                    .cornerRadius(10)
+                    .onTapGesture {
+                        let generator = UIImpactFeedbackGenerator(style: .heavy)
+                        generator.impactOccurred()
+                        
+                        if let course = course {
+                            courseStatus = .passed
+                            course.status = CourseStatus.passed.rawValue
+                        }
+                        
+                        do {
+                            try viewContext.save()
+                        } catch {
+                            print(error)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    ZStack {
+                        courseStatus == CourseStatus.failed ? Color("Color8") : Color(UIColor.systemGroupedBackground)
+                        
+                        VStack(spacing: 5) {
+                            Image(systemName: "xmark.diamond.fill")
+                                .font(.system(size: 21, weight: .semibold))
+                                .foregroundStyle(courseStatus == CourseStatus.failed ? .white : Color(UIColor.lightGray))
+                            Text("Failed")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(courseStatus == CourseStatus.failed ? .white : Color(UIColor.lightGray))
+                        }
+                        .padding(.vertical, 15)
+                    }
+                    .cornerRadius(10)
+                    .onTapGesture {
+                        let generator = UIImpactFeedbackGenerator(style: .heavy)
+                        generator.impactOccurred()
+                        
+                        if let course = course {
+                            courseStatus = .failed
+                            course.status = CourseStatus.failed.rawValue
+                        }
+                        
+                        do {
+                            try viewContext.save()
+                        } catch {
+                            print(error)
+                        }
+                    }
                 }
-                .cornerRadius(10)
-                .onTapGesture {
-                    let generator = UIImpactFeedbackGenerator(style: .heavy)
-                    generator.impactOccurred()
-                    
-                    if let course = course {
-                        courseStatus = .passed
-                        course.status = CourseStatus.passed.rawValue
-                    }
-                    
-                    do {
-                        try viewContext.save()
-                    } catch {
-                        print(error)
-                    }
-                }
-                
-                Spacer()
-                
-                ZStack {
-                    courseStatus == CourseStatus.failed ? Color("Color8") : Color(UIColor.secondarySystemGroupedBackground)
-                    
-                    VStack(spacing: 5) {
-                        Image(systemName: "xmark.diamond.fill")
-                            .font(.system(size: 21, weight: .semibold))
-                            .foregroundStyle(courseStatus == CourseStatus.failed ? .white : Color(UIColor.lightGray))
-                        Text("Failed")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(courseStatus == CourseStatus.failed ? .white : Color(UIColor.lightGray))
-                    }
-                    .padding(.vertical, 15)
-                }
-                .cornerRadius(10)
-                .onTapGesture {
-                    let generator = UIImpactFeedbackGenerator(style: .heavy)
-                    generator.impactOccurred()
-                    
-                    if let course = course {
-                        courseStatus = .failed
-                        course.status = CourseStatus.failed.rawValue
-                    }
-                    
-                    do {
-                        try viewContext.save()
-                    } catch {
-                        print(error)
-                    }
-                }
+                .padding()
             }
+            .cornerRadius(15)
         }
     }
         

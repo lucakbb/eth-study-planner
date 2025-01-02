@@ -39,10 +39,20 @@ class FirestoreCacheManager {
         let courseDictionary = Dictionary(uniqueKeysWithValues: allCourses.map { ($0.id, $0) })
 
         // Map each course ID to its corresponding `FirestoreCourse` if it exists in the cache
-        return courseIDs.map { courseIDs in
-            courseIDs.compactMap { courseDictionary[$0] }
+        return courseIDs.map { semester in
+            semester.compactMap { courseID in
+                // Check if the ID contains "&&"
+                if courseID.contains("&&") {
+                    // Return the exact match
+                    return courseDictionary[courseID]
+                } else {
+                    // Find any course that starts with the `courseID`
+                    return allCourses.first(where: { $0.id.starts(with: courseID) })
+                }
+            }
         }
     }
+
     
     /// Encodes and saves an array of courses to the courses cache file.
     /// - Parameter data: An array of `FirestoreCourse` objects to save.

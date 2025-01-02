@@ -89,10 +89,10 @@ struct ImportCourseView: View {
                                         maxCreditsWarning
                                     }
                                     
-                                    if(viewModel.matchingCoursesInSelectedSemester.count > 0) {
-                                        alreadyAddedToSelectedSemesterWarning
-                                    } else if(passedCourse.count > 0) {
+                                    if(passedCourse.count > 0) {
                                         alreadyPassedWarning
+                                    } else if(viewModel.matchingCoursesInSelectedSemester.count > 0) {
+                                        alreadyAddedToSelectedSemesterWarning
                                     }
                                 }
                             }
@@ -155,13 +155,13 @@ struct ImportCourseView: View {
                         }
                     } else {
                         ZStack {
-                            if(viewModel.matchingCoursesInSelectedSemester.count > 0) {
-                                Color(UIColor.secondarySystemGroupedBackground)
-                                Text("Already in the \(((selectedSemester?.number ?? 0) + 1)). Semester")
-                                    .font(.system(size: 20, weight: .semibold))
-                            } else if(passedCourse.count > 0) {
+                            if(passedCourse.count > 0) {
                                 Color(UIColor.secondarySystemGroupedBackground)
                                 Text("Passed in the \(((passedCourse[0].semester?.number ?? 0) + 1)). Semester")
+                                    .font(.system(size: 20, weight: .semibold))
+                            } else if(viewModel.matchingCoursesInSelectedSemester.count > 0) {
+                                Color(UIColor.secondarySystemGroupedBackground)
+                                Text("Already added to the \(((selectedSemester?.number ?? 0) + 1)). Semester")
                                     .font(.system(size: 20, weight: .semibold))
                             } else {
                                 Color("Color1")

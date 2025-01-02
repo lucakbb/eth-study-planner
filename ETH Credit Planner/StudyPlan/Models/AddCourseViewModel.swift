@@ -9,7 +9,7 @@ import Foundation
 import Firebase
 
 struct FirestoreCourse: Hashable, Decodable, Encodable, Equatable, Identifiable {
-    var id: String
+    var id: String // Represents the identifier with the structure "course-id&&category-id" (e.g., "351-1109-00L&&3"), enabling support for associating a single lecture with multiple categories.
     var category: Int
     var credits: Int
     var name: String
