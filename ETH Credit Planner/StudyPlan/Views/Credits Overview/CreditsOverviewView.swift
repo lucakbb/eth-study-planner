@@ -19,19 +19,20 @@ struct CreditsOverviewView: View {
     
     @FetchRequest(
         entity: Course.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Course.id, ascending: true)]
+        sortDescriptors: [NSSortDescriptor(keyPath: \Course.id, ascending: true)],
+        predicate: NSPredicate(format: "status != %@", CourseStatus.failed.rawValue)
     ) var courses: FetchedResults<Course>
     
     @FetchRequest(
         entity: Course.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Course.id, ascending: true)],
-        predicate: NSPredicate(format: "category.id == 1 OR category.id == 2")
+        predicate: NSPredicate(format: "(category.id == 1 OR category.id == 2) AND status != %@", CourseStatus.failed.rawValue)
     ) var basicAndCore: FetchedResults<Course>
     
     @FetchRequest(
         entity: Course.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Course.id, ascending: true)],
-        predicate: NSPredicate(format: "category.id == 4")
+        predicate: NSPredicate(format: "category.id == 4 AND status != %@", CourseStatus.failed.rawValue)
     ) var electives: FetchedResults<Course>
     
     @State var filteredCourses: [Course] = []
@@ -168,9 +169,14 @@ struct CreditsOverviewView: View {
                         .padding(.horizontal, 16)
                     }
                     .navigationTitle("Credit Calculation")
+                    .toolbar {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(Color(UIColor.systemGray3))
+                            .onTapGesture {
+                                isCreditCalculationShown = false
+                            }
+                    }
                 }
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
             }
         }
     }

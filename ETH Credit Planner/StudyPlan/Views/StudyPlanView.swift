@@ -195,10 +195,10 @@ struct CategoryView: View {
                         
                         // filter courses for status
                         let passedCourses = courses.filter { $0.status == CourseStatus.passed.rawValue }
-                        
-                        // calculate credits
                         let passedCredits = passedCourses.reduce(0) { $0 + $1.credits }
-                        let plannedCredits = courses.reduce(0) { $0 + $1.credits }
+                        
+                        let plannedCourses = courses.filter { $0.status == CourseStatus.planned.rawValue }
+                        let plannedCredits = plannedCourses.reduce(0) { $0 + $1.credits }
                          
                         
                         NavigationLink {

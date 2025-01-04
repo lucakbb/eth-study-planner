@@ -37,10 +37,10 @@ struct CourseOverviewView: View {
                     Spacer()
                     Image(systemName: "trash.fill")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(Color(UIColor.systemRed))
+                        .foregroundStyle(Color("Color9"))
                     Text("Delete Course")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(Color(UIColor.systemRed))
+                        .foregroundStyle(Color("Color9"))
                     Spacer()
                 }
                 .padding(.bottom, 40)

@@ -19,11 +19,16 @@ class ImportCourseViewModel: ObservableObject {
     
     func fetchMatchingCourses(semester: Semester, courseID: String) {
         let context = PersistenceController.shared.container.viewContext
+        
+        let mainID = courseID.split(separator: "&&").first.map(String.init) ?? courseID
+        
         let fetchRequest: NSFetchRequest<Course> = Course.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Course.name, ascending: true)]
         fetchRequest.predicate = NSPredicate(
-            format: "semester.number == %d AND id == %@",
-            semester.number, courseID as CVarArg
+            format: "(semester.number == %d) AND (id == %@ OR id BEGINSWITH %@)",
+            semester.number,
+            mainID as CVarArg,
+            mainID as CVarArg
         )
         
         do {

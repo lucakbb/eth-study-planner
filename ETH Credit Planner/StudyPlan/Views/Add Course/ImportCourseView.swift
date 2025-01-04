@@ -40,6 +40,7 @@ struct ImportCourseView: View {
     @State var filteredSemesters: [Semester] = []
     @State var isReviewsSheetShown: Bool = false
     @State var isVVZSheetShown: Bool = false
+    @State var isAlreadyAddedAlertShown: Bool = false
     
     init(course: FirestoreCourse?, semester: Semester?) {
         self.course = course
@@ -134,8 +135,17 @@ struct ImportCourseView: View {
                                 Button {
                                     selectedSemester = semester
                                     
-                                    if let selectedSemester = selectedSemester {
-                                        viewModel.fetchMatchingCourses(semester: selectedSemester, courseID: course?.id ?? "-1")
+                                    viewModel.fetchMatchingCourses(semester: semester, courseID: course?.id ?? "-1")
+                                    if(viewModel.matchingCoursesInSelectedSemester.count == 0) {
+                                        if let selectedCourse = course, let semester = selectedSemester {
+                                            SimpleAnalytics.shared.track(event: "added course")
+                                            
+                                            viewModel.importCourse(firestoreCourse: selectedCourse, semester: semester, category: categories[course?.category ?? 0])
+                                            
+                                            dismiss()
+                                        }
+                                    } else {
+                                        isAlreadyAddedAlertShown = true
                                     }
                                 } label: {
                                     Text("\(semester.number + 1). Semester")
@@ -144,7 +154,7 @@ struct ImportCourseView: View {
                         } label: {
                             ZStack {
                                 Color("Color1")
-                                Text("Select Semester")
+                                Text("Add Course")
                                     .font(.system(size: 20, weight: .semibold))
                                     .foregroundStyle(.white)
                             }
@@ -222,6 +232,15 @@ struct ImportCourseView: View {
                             filteredSemesters = []
                         }
                     }
+                }
+                .alert("Error", isPresented: $isAlreadyAddedAlertShown) {
+                    Button {
+                        isAlreadyAddedAlertShown = false
+                    } label: {
+                        Text("Ok")
+                    }
+                } message: {
+                    Text("You have already added this course to the selcted Semester.")
                 }
             }
             .background(Color(UIColor.systemGroupedBackground))

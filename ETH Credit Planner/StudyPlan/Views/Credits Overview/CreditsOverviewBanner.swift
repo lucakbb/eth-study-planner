@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct CreditsOverviewBanner: View {
-    @FetchRequest(entity: Course.entity(), sortDescriptors: [])
+    @FetchRequest(entity: Course.entity(),
+                  sortDescriptors: [],
+                  predicate: NSPredicate(format: "status != %@", CourseStatus.failed.rawValue))
     var courses: FetchedResults<Course>
     
     @FetchRequest(entity: Category.entity(), sortDescriptors: [])

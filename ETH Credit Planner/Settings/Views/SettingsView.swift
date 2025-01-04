@@ -118,7 +118,7 @@ struct SettingsView: View {
                 }
             }
             
-            Section(footer: Text("Set the number of semesters to be displayed in the study Plan.")) {
+            Section(footer: Text("Set the number of semesters to be displayed in the study plan.")) {
                 HStack(spacing: 13) {
                     ZStack {
                         Color(Color("Color3"))
