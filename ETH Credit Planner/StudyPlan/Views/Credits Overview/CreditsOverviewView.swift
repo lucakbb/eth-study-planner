@@ -23,41 +23,8 @@ struct CreditsOverviewView: View {
         predicate: NSPredicate(format: "status != %@", CourseStatus.failed.rawValue)
     ) var courses: FetchedResults<Course>
     
-    @FetchRequest(
-        entity: Course.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Course.id, ascending: true)],
-        predicate: NSPredicate(format: "(category.id == 1 OR category.id == 2) AND status != %@", CourseStatus.failed.rawValue)
-    ) var basicAndCore: FetchedResults<Course>
-    
-    @FetchRequest(
-        entity: Course.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Course.id, ascending: true)],
-        predicate: NSPredicate(format: "category.id == 4 AND status != %@", CourseStatus.failed.rawValue)
-    ) var electives: FetchedResults<Course>
-    
     @State var filteredCourses: [Course] = []
     @State var isCreditCalculationShown: Bool = false
-    
-    var creditsEarned: Int {
-        var totalCredits = 0
-        categories.forEach { category in
-            totalCredits += min(earnedCreditsByCategory[category] ?? 0, Int(category.maxCredits))
-        }
-        
-        return totalCredits
-    }
-
-    var creditsPlanned: Int {
-        filteredCourses.filter { $0.status == CourseStatus.planned.rawValue }.reduce(0) { $0 + Int($1.credits) }
-    }
-    
-    var basicAndCoreCredits: Int {
-        basicAndCore.reduce(0) { $0 + Int($1.credits) }
-    }
-    
-    var electivesCredits: Int {
-        electives.reduce(0) { $0 + Int($1.credits) } + basicAndCoreCredits
-    }
     
     var earnedCreditsByCategory: [Category: Int] {
         var result = Dictionary(uniqueKeysWithValues: categories.map { ($0, 0) })
@@ -71,6 +38,60 @@ struct CreditsOverviewView: View {
         }
         
         return result
+    }
+    
+    var plannedCreditsByCategory: [Category: Int] {
+        var result = Dictionary(uniqueKeysWithValues: categories.map { ($0, 0) })
+        
+        filteredCourses.forEach { course in
+            if let category = course.category {
+                if(course.status == CourseStatus.planned.rawValue) {
+                    result[category, default: 0] += Int(course.credits)
+                }
+            }
+        }
+        
+        return result
+    }
+    
+    var creditsEarned: Int {
+        var totalCredits = 0
+        categories.forEach { category in
+            totalCredits += min(earnedCreditsByCategory[category] ?? 0, Int(category.maxCredits))
+        }
+        
+        return totalCredits
+    }
+    
+    var creditsPlanned: Int {
+        var totalCredits = 0
+        categories.forEach { category in
+            totalCredits += min(plannedCreditsByCategory[category] ?? 0, Int(category.maxCredits))
+        }
+        
+        return totalCredits
+    }
+    
+    var basicAndCoreCredits: Int {
+        filteredCourses
+            .filter { course in
+                if let category = course.category {
+                    return category.id == 1 || category.id == 2
+                }
+                return false
+            }
+            .reduce(0) { $0 + Int($1.credits) }
+    }
+    
+    var electivesCredits: Int {
+        filteredCourses
+            .filter { course in
+                if let category = course.category {
+                    return category.id == 1 || category.id == 2 || category.id == 4
+                }
+                return false
+            }
+            .reduce(0) { $0 + Int($1.credits) }
     }
     
     var creditsByCategory: [Category: Int] {

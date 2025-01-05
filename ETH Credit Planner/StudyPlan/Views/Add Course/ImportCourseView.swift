@@ -240,7 +240,7 @@ struct ImportCourseView: View {
                         Text("Ok")
                     }
                 } message: {
-                    Text("You have already added this course to the selcted Semester.")
+                    Text("You have already added this course to the selected semester.")
                 }
             }
             .background(Color(UIColor.systemGroupedBackground))
