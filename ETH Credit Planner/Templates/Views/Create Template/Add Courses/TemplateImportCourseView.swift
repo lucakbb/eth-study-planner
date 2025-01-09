@@ -10,6 +10,7 @@ import SafariServices
 
 struct TemplateImportCourseView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) var openURL
     
     @FetchRequest(
         entity: Category.entity(),
@@ -154,7 +155,13 @@ struct TemplateImportCourseView: View {
                 }
                 .cornerRadius(10)
                 .onTapGesture {
-                    isVVZSheetShown = true
+                    if(course.vvz != "") {
+                        #if targetEnvironment(macCatalyst)
+                        openURL(URL(string: course.vvz)!)
+                        #else
+                        isVVZSheetShown = true
+                        #endif
+                    }
                 }
                 .sheet(isPresented: $isVVZSheetShown) {
                     if let url = URL(string: (course.vvz)) {
@@ -189,10 +196,16 @@ struct TemplateImportCourseView: View {
                 }
                 .cornerRadius(10)
                 .onTapGesture {
+                    let courseMainID = course.id.split(separator: "&&").first.map(String.init) ?? course.id
+                    #if targetEnvironment(macCatalyst)
+                    openURL(URL(string: "https://n.ethz.ch/~lteufelbe/coursereview/?course=\(courseMainID)")!)
+                    #else
                     isReviewsSheetShown = true
+                    #endif
                 }
                 .sheet(isPresented: $isReviewsSheetShown) {
-                    if let url = URL(string: "https://n.ethz.ch/~lteufelbe/coursereview/?course=\(course.id)") {
+                    let courseMainID = course.id.split(separator: "&&").first.map(String.init) ?? course.id
+                    if let url = URL(string: "https://n.ethz.ch/~lteufelbe/coursereview/?course=\(courseMainID)") {
                         SafariView(url: url)
                     }
                 }

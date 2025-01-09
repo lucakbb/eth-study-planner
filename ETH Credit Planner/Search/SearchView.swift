@@ -51,8 +51,8 @@ struct SearchView: View {
                         courseList
                     }
                 }
+                .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             }
-            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             .navigationTitle("Search")
             .background(Color(UIColor.systemGroupedBackground))
             .searchable(text: $searchText)

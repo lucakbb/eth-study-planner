@@ -38,12 +38,14 @@ struct ContentView: View {
                             Label("Search", systemImage: "magnifyingglass")
                         }
                     
+                    /*
                     if(recommendationsEnabled) {
                         RecommendationsView()
                             .tabItem {
                                 Label("Recommendations", systemImage: "star.fill")
                             }
                     }
+                     */
                     
                     TemplateLibraryView()
                         .tabItem {
@@ -93,9 +95,11 @@ struct ContentView: View {
                                 NavigationLink(value: MenuItem.search) {
                                     Label("Search", systemImage: "magnifyingglass")
                                 }
+                                /*
                                 NavigationLink(value: MenuItem.recommendations) {
                                     Label("Recommendations", systemImage: "star.fill")
                                 }
+                                 */
                                 NavigationLink(value: MenuItem.templates) {
                                     Label("Templates", systemImage: "rectangle.stack.fill")
                                 }

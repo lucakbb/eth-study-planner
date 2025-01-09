@@ -13,6 +13,7 @@ import SimpleAnalytics
 struct CourseOverviewView: View {
     let viewContext = PersistenceController.shared.container.viewContext
     
+    @Environment(\.openURL) var openURL
     @Environment(\.dismiss) private var dismiss
     @State var course: Course?
     
@@ -25,7 +26,11 @@ struct CourseOverviewView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 25) {
-                links
+                if let vvz = course?.vvz, let id = course?.id {
+                    if vvz != "" && id != "" {
+                        links
+                    }
+                }
                 
                 general
                 
@@ -103,7 +108,11 @@ struct CourseOverviewView: View {
                 .cornerRadius(10)
                 .onTapGesture {
                     if(course?.vvz != "") {
+                        #if targetEnvironment(macCatalyst)
+                        openURL(URL(string: course?.vvz ?? "")!)
+                        #else
                         isVVZSheetShown = true
+                        #endif
                     }
                 }
                 .sheet(isPresented: $isVVZSheetShown) {
@@ -139,7 +148,12 @@ struct CourseOverviewView: View {
                 }
                 .cornerRadius(10)
                 .onTapGesture {
+                    let courseMainID = course?.id?.split(separator: "&&").first.map(String.init) ?? course?.id
+                    #if targetEnvironment(macCatalyst)
+                    openURL(URL(string: "https://n.ethz.ch/~lteufelbe/coursereview/?course=\(courseMainID ?? "")")!)
+                    #else
                     isReviewsSheetShown = true
+                    #endif
                 }
                 .sheet(isPresented: $isReviewsSheetShown) {
                     let courseMainID = course?.id?.split(separator: "&&").first.map(String.init) ?? course?.id

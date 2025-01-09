@@ -10,9 +10,11 @@ import SimpleAnalytics
 import CoreData
 
 struct ImportCourseView: View {
+    @Environment(\.openURL) var openURL
+    @Environment(\.dismiss) private var dismiss
+    
     let viewContext = PersistenceController.shared.container.viewContext
     @ObservedObject var viewModel: ImportCourseViewModel = ImportCourseViewModel()
-    @Environment(\.dismiss) private var dismiss
     
     // Fetches all courses.
     // Used to check if the maximum number of credits for a specific category has been reached.
@@ -280,7 +282,11 @@ struct ImportCourseView: View {
                 }
                 .cornerRadius(10)
                 .onTapGesture {
+                    #if targetEnvironment(macCatalyst)
+                    openURL(URL(string: course?.vvz ?? "")!)
+                    #else
                     isVVZSheetShown = true
+                    #endif
                 }
                 .sheet(isPresented: $isVVZSheetShown) {
                     if let url = URL(string: (course?.vvz ?? "")) {
@@ -315,10 +321,16 @@ struct ImportCourseView: View {
                 }
                 .cornerRadius(10)
                 .onTapGesture {
+                    let courseMainID = course?.id.split(separator: "&&").first.map(String.init) ?? course?.id
+                    #if targetEnvironment(macCatalyst)
+                    openURL(URL(string: "https://n.ethz.ch/~lteufelbe/coursereview/?course=\(courseMainID ?? "")")!)
+                    #else
                     isReviewsSheetShown = true
+                    #endif
                 }
                 .sheet(isPresented: $isReviewsSheetShown) {
-                    if let url = URL(string: "https://n.ethz.ch/~lteufelbe/coursereview/?course=\(course?.id ?? "")") {
+                    let courseMainID = course?.id.split(separator: "&&").first.map(String.init) ?? course?.id
+                    if let url = URL(string: "https://n.ethz.ch/~lteufelbe/coursereview/?course=\(courseMainID ?? "")") {
                         SafariView(url: url)
                     }
                 }

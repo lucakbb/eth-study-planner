@@ -45,7 +45,7 @@ class AddCourseViewModel: ObservableObject {
         let currentWeek = calendar.component(.weekOfYear, from: currentDate)
         
         var currentSemester: String
-        if (1...22).contains(currentWeek) {
+        if (49...52).contains(currentWeek) || (1...23).contains(currentWeek) {
             currentSemester = "FS\(currentYear % 100)"
         } else {
             currentSemester = "HS\(currentYear % 100)"
@@ -139,13 +139,13 @@ class AddCourseViewModel: ObservableObject {
             return []
         }
         
-        let coursesCollectionRef = FirestoreAPI.shared.db.collection("courses")
+        let coursesCollectionRef = FirestoreAPI.shared.db.collection("cs-bsc-courses")
         let lastUpdateDocumentRef = FirestoreAPI.shared.db.collection("general").document("lastCourseUpdate")
 
         do {
             let lastUpdateSnapshot = try await lastUpdateDocumentRef.getDocument()
             
-            if let data = lastUpdateSnapshot.data(), let lastUpdateTimestamp = data["date"] as? Timestamp {
+            if let data = lastUpdateSnapshot.data(), let lastUpdateTimestamp = data["cs-bsc"] as? Timestamp {
                 let lastUpdateDate = lastUpdateTimestamp.dateValue()
                 UserDefaults.standard.set(lastUpdateDate, forKey: "lastCourseUpdate")
             }
@@ -206,7 +206,7 @@ class AddCourseViewModel: ObservableObject {
                 do {
                     let documentSnapshot = try await documentRef.getDocument()
                     
-                    guard let data = documentSnapshot.data(), let timestamp = data["date"] as? Timestamp else {
+                    guard let data = documentSnapshot.data(), let timestamp = data["cs-bsc"] as? Timestamp else {
                         print("Document does not exist or date field is missing.")
                         return true
                     }
