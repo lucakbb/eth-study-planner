@@ -40,3 +40,7 @@ Icon
 ._*
 .Spotlight-V100
 .Trashes
+
+# Server files
+.venv
+__pycache__
