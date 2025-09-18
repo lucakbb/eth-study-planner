@@ -150,37 +150,7 @@ struct CategoryOverviewView: View {
             NavigationLink {
                 CourseOverviewView(course: course)
             } label: {
-                ZStack {
-                    Color(UIColor.secondarySystemGroupedBackground)
-                    
-                    HStack {
-                        if(course.status == CourseStatus.planned.rawValue) {
-                            Image(systemName: "clock.fill")
-                                .font(.system(size: 20, weight: .semibold))
-                        } else if(course.status == CourseStatus.passed.rawValue) {
-                            Image(systemName: "medal.fill")
-                                .font(.system(size: 20, weight: .semibold))
-                        } else {
-                            Image(systemName: "xmark.diamond.fill")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundStyle(Color("Color8"))
-                        }
-                        
-                        Text(course.name ?? "")
-                            .multilineTextAlignment(.leading)
-                            .foregroundStyle(Color(UIColor.label))
-                            .font(.system(size: 20, weight: .semibold))
-                        
-                        Spacer()
-                        
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundStyle(Color(UIColor.systemGray2))
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 12)
-                }
-                .cornerRadius(10)
+                CourseRow(course: course)
             }
         }
     }

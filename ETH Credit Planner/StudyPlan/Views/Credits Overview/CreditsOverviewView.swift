@@ -159,14 +159,20 @@ struct CreditsOverviewView: View {
                 }
                 .padding(.horizontal, 16)
             }
+            .padding(.bottom, 20)
             .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("All Courses")
             .toolbar {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(Color(UIColor.systemGray3))
-                    .onTapGesture {
-                        isPresented = false
+                Button {
+                    isPresented = false
+                } label: {
+                    if #available(iOS 26.0, *) {
+                        Image(systemName: "xmark")
+                    } else {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(Color(UIColor.systemGray3))
                     }
+                }
             }
             .onAppear {
                 filteredCourses = CourseFilter.shared.filterCourses(Array(courses))

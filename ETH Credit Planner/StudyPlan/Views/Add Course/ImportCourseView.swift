@@ -82,7 +82,7 @@ struct ImportCourseView: View {
                 VStack {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 25) {
-                            let categoryCourses = courses.filter { $0.category?.id ?? -1 == course?.category ?? -2 }
+                            let categoryCourses = courses.filter { $0.category?.id ?? -1 == course?.category ?? -2 && $0.status != CourseStatus.failed.rawValue }
                             let credits = categoryCourses.reduce(0) { $0 + Int($1.credits)}
                             let maxCredits = categories[course?.category ?? 0].maxCredits
                             
@@ -487,7 +487,7 @@ struct ImportCourseView: View {
                 Image(systemName: "info.circle.fill")
                     .foregroundStyle(.white)
                     .font(.system(size: 25, weight: .semibold))
-                Text("You have already achieved the maximum possible number of credits for the category \(categories[course?.category ?? 0].name ?? "").")
+                Text("You have already planned/achieved the maximum possible number of credits for the category \(categories[course?.category ?? 0].name ?? "").")
                     .multilineTextAlignment(.leading)
                     .foregroundStyle(.white)
                     .font(.system(size: 15, weight: .semibold))

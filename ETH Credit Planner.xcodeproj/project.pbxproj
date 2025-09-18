@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		811D13162E7C1F5E00920E8F /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 811D13152E7C1F5E00920E8F /* AppIcon.icon */; };
 		81AE28002CEBE0A600FCFBFF /* AcknowList in Frameworks */ = {isa = PBXBuildFile; productRef = 81AE27FF2CEBE0A600FCFBFF /* AcknowList */; };
 		81B373702CFB27D3004B49EE /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 81B3736F2CFB27D3004B49EE /* FirebaseRemoteConfig */; };
 		81C035BE2CE22B17009845C8 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 81C035BD2CE22B17009845C8 /* FirebaseAuth */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		811D13152E7C1F5E00920E8F /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		8183FE152CD78CAB00F79B3B /* ETH Credit Planner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ETH Credit Planner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -64,6 +66,7 @@
 			children = (
 				8183FE172CD78CAB00F79B3B /* ETH Credit Planner */,
 				8183FE162CD78CAB00F79B3B /* Products */,
+				811D13152E7C1F5E00920E8F /* AppIcon.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -153,6 +156,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				811D13162E7C1F5E00920E8F /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

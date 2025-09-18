@@ -11,11 +11,11 @@ import SafariServices
 import SimpleAnalytics
 
 struct CourseOverviewView: View {
-    let viewContext = PersistenceController.shared.container.viewContext
+    @Environment(\.managedObjectContext) private var viewContext
     
     @Environment(\.openURL) var openURL
     @Environment(\.dismiss) private var dismiss
-    @State var course: Course?
+    @ObservedObject var course: Course
     
     @State var courseStatus: CourseStatus = .planned
     @State private var selectedRating: Int? = nil
@@ -26,7 +26,7 @@ struct CourseOverviewView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 25) {
-                if let vvz = course?.vvz, let id = course?.id {
+                if let vvz = course.vvz, let id = course.id {
                     if vvz != "" && id != "" {
                         links
                     }
@@ -52,13 +52,12 @@ struct CourseOverviewView: View {
                 .onTapGesture {
                     dismiss()
                     
-                    if let course = course {
-                        viewContext.delete(course)
-                        do {
-                            try viewContext.save()
-                        } catch {
-                            print("\(error)")
-                        }
+                    viewContext.delete(course)
+                    
+                    do {
+                        try viewContext.save()
+                    } catch {
+                        print("\(error)")
                     }
                 }
             }
@@ -67,11 +66,12 @@ struct CourseOverviewView: View {
         .background(Color(UIColor.systemGroupedBackground))
         .navigationTitle("Course Overview")
         .onAppear {
-            self.courseStatus = CourseStatus(rawValue: course?.status ?? CourseStatus.planned.rawValue) ?? .planned
-            self.selectedRating = Int(course?.rating ?? -1)
+            self.courseStatus = CourseStatus(rawValue: course.status ?? CourseStatus.planned.rawValue) ?? .planned
+            self.selectedRating = Int(course.rating)
             
             SimpleAnalytics.shared.track(path: ["study-plan", "course-overview"])
         }
+        .onDisappear { try? viewContext.save() }
     }
     
     var links: some View {
@@ -107,16 +107,16 @@ struct CourseOverviewView: View {
                 }
                 .cornerRadius(10)
                 .onTapGesture {
-                    if(course?.vvz != "") {
+                    if(course.vvz != "") {
                         #if targetEnvironment(macCatalyst)
-                        openURL(URL(string: course?.vvz ?? "")!)
+                        openURL(URL(string: course.vvz ?? "")!)
                         #else
                         isVVZSheetShown = true
                         #endif
                     }
                 }
                 .sheet(isPresented: $isVVZSheetShown) {
-                    if let url = URL(string: (course?.vvz ?? "")) {
+                    if let url = URL(string: (course.vvz ?? "")) {
                         SafariView(url: url)
                     }
                 }
@@ -148,7 +148,7 @@ struct CourseOverviewView: View {
                 }
                 .cornerRadius(10)
                 .onTapGesture {
-                    let courseMainID = course?.id?.split(separator: "&&").first.map(String.init) ?? course?.id
+                    let courseMainID = course.id?.split(separator: "&&").first.map(String.init) ?? course.id
                     #if targetEnvironment(macCatalyst)
                     openURL(URL(string: "https://n.ethz.ch/~lteufelbe/coursereview/?course=\(courseMainID ?? "")")!)
                     #else
@@ -156,7 +156,7 @@ struct CourseOverviewView: View {
                     #endif
                 }
                 .sheet(isPresented: $isReviewsSheetShown) {
-                    let courseMainID = course?.id?.split(separator: "&&").first.map(String.init) ?? course?.id
+                    let courseMainID = course.id?.split(separator: "&&").first.map(String.init) ?? course.id
                     if let url = URL(string: "https://n.ethz.ch/~lteufelbe/coursereview/?course=\(courseMainID ?? "")") {
                         SafariView(url: url)
                     }
@@ -198,7 +198,7 @@ struct CourseOverviewView: View {
                     .padding(10)
                     
                     VStack(alignment: .leading, spacing: 5) {
-                        Text(course?.name ?? "")
+                        Text(course.name ?? "")
                             .font(.system(size: 18, weight: .semibold))
                             .padding(.vertical, 7)
                             .padding(.leading, 10)
@@ -206,7 +206,7 @@ struct CourseOverviewView: View {
                             .background(Color(UIColor.systemGroupedBackground))
                             .cornerRadius(10)
                         
-                        Text(course?.category?.name ?? "")
+                        Text(course.category?.name ?? "")
                             .font(.system(size: 18, weight: .semibold))
                             .padding(.vertical, 7)
                             .padding(.leading, 10)
@@ -214,7 +214,7 @@ struct CourseOverviewView: View {
                             .background(Color(UIColor.systemGroupedBackground))
                             .cornerRadius(10)
                         
-                        Text("\(course?.credits ?? 0) ECTS")
+                        Text("\(course.credits) ECTS")
                             .font(.system(size: 18, weight: .semibold))
                             .padding(.vertical, 7)
                             .padding(.leading, 10)
@@ -258,10 +258,8 @@ struct CourseOverviewView: View {
                         let generator = UIImpactFeedbackGenerator(style: .heavy)
                         generator.impactOccurred()
                         
-                        if let course = course {
-                            courseStatus = .planned
-                            course.status = CourseStatus.planned.rawValue
-                        }
+                        courseStatus = .planned
+                        course.status = CourseStatus.planned.rawValue
                         
                         do {
                             try viewContext.save()
@@ -290,10 +288,8 @@ struct CourseOverviewView: View {
                         let generator = UIImpactFeedbackGenerator(style: .heavy)
                         generator.impactOccurred()
                         
-                        if let course = course {
-                            courseStatus = .passed
-                            course.status = CourseStatus.passed.rawValue
-                        }
+                        courseStatus = .passed
+                        course.status = CourseStatus.passed.rawValue
                         
                         do {
                             try viewContext.save()
@@ -322,10 +318,8 @@ struct CourseOverviewView: View {
                         let generator = UIImpactFeedbackGenerator(style: .heavy)
                         generator.impactOccurred()
                         
-                        if let course = course {
-                            courseStatus = .failed
-                            course.status = CourseStatus.failed.rawValue
-                        }
+                        courseStatus = .failed
+                        course.status = CourseStatus.failed.rawValue
                         
                         do {
                             try viewContext.save()
@@ -364,7 +358,7 @@ struct CourseOverviewView: View {
                         .cornerRadius(5)
                         
                         
-                        Text(course?.name ?? "")
+                        Text(course.name ?? "")
                             .fontWeight(.semibold)
                             .font(.system(size: 20))
                         
@@ -383,14 +377,12 @@ struct CourseOverviewView: View {
                                     
                                     selectedRating = index
                                     
-                                    if let course = course {
-                                        course.rating = Int16(index)
-                                        
-                                        do {
-                                            try viewContext.save()
-                                        } catch {
-                                            print(error)
-                                        }
+                                    course.rating = Int16(index)
+                                    
+                                    do {
+                                        try viewContext.save()
+                                    } catch {
+                                        print(error)
                                     }
                                 }
                         }
@@ -406,7 +398,8 @@ struct CourseOverviewView: View {
 }
 
 
+
 #Preview {
-    CourseOverviewView(course: nil)
+    CourseOverviewView(course: Course())
 }
 

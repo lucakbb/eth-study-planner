@@ -157,22 +157,22 @@ struct AddCourseView: View {
     }
     
     var searchFilter: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack {
-                if #available(iOS 26.0, *) {
-                    categoryFilterButton
-                        .glassEffect()
-                } else {
-                    categoryFilterButton
-                }
-                
-                if #available(iOS 26.0, *) {
-                    semesterFilterButton
-                        .glassEffect()
-                } else {
-                    semesterFilterButton
-                }
+        HStack() {
+            if #available(iOS 26.0, *) {
+                categoryFilterButton
+                    .glassEffect()
+            } else {
+                categoryFilterButton
             }
+            
+            if #available(iOS 26.0, *) {
+                semesterFilterButton
+                    .glassEffect()
+            } else {
+                semesterFilterButton
+            }
+            
+            Spacer()
         }
     }
     

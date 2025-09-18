@@ -61,7 +61,7 @@ struct OnboardingView: View {
                     }
                 }
                 .frame(height: 54)
-                .cornerRadius(15)
+                .cornerRadiusTextField()
                 .padding(.horizontal, 16)
                 .onTapGesture {
                     Task {
@@ -229,7 +229,7 @@ struct OnboardingView: View {
                                     .foregroundStyle(.white)
                             }
                             .frame(width: 32, height: 32)
-                            .cornerRadius(5)
+                            .cornerRadiusIcon()
                             
                             
                             Text("Semesters: \(viewModel.amountOfSemesters)")
@@ -243,7 +243,7 @@ struct OnboardingView: View {
                         .padding(.horizontal, 12)
                     }
                     .frame(height: 52)
-                    .cornerRadius(10)
+                    .cornerRadiusTextField()
                     .padding(.top, -5)
                     .padding(.bottom, 30)
                     
@@ -263,7 +263,7 @@ struct OnboardingView: View {
                                     .foregroundStyle(.white)
                             }
                             .frame(width: 32, height: 32)
-                            .cornerRadius(5)
+                            .cornerRadiusIcon()
                             
                             Text("\(viewModel.currentSemester + 1). Semester")
                                 .font(.system(size: 20, weight: .semibold))
@@ -276,7 +276,7 @@ struct OnboardingView: View {
                         .padding(.horizontal, 12)
                     }
                     .frame(height: 52)
-                    .cornerRadius(10)
+                    .cornerRadiusTextField()
                     .padding(.top, -5)
                     
                     Spacer()
@@ -361,7 +361,7 @@ struct OnboardingView: View {
                                     .foregroundStyle(.white)
                             }
                             .frame(width: 32, height: 32)
-                            .cornerRadius(5)
+                            .cornerRadiusIcon()
                             
                             TextField("Name", text: $name)
                                 .font(.system(size: 17, weight: .medium))
@@ -369,7 +369,7 @@ struct OnboardingView: View {
                         .padding(.horizontal, 12)
                     }
                     .frame(height: 52)
-                    .cornerRadius(10)
+                    .cornerRadiusTextField()
                     
                     Spacer()
                 }
