@@ -3,7 +3,10 @@ from fastapi import Depends, FastAPI, HTTPException, Header, Query
 from pydantic import BaseModel
 from typing import List, Optional
 from services.Scraper import scrape_sem
+from services.FirebaseConnection import uploadCourses
 import uvicorn
+
+SCRAPE_API_TOKEN_PATH = "SCRAPE_API_TOKEN"
 
 app = FastAPI(title="Study Planner API", version="1.0.0")
 
@@ -28,11 +31,10 @@ class UpdateCoursesRequest(BaseModel):
     old_semester: bool = False
     is_hs: bool
     year: int
+    deprecated_upload: bool = False
 
 class UpdateCoursesResponse(BaseModel):
-    updated_courses: int
-    semester_id: int
-    applied_whatif: bool
+    changelog: List[dict]
 
 @app.get("/health")
 async def health_check():
@@ -45,7 +47,7 @@ async def generate_recommendations(request: RecommendationRequest):
 
 def verify_token(authorization: str = Header(None)):
 
-    if not os.getenv("SCRAPE_API_TOKEN"):
+    if not os.getenv(SCRAPE_API_TOKEN_PATH):
         raise HTTPException(status_code=500, detail="Server misconfiguration: Missing API token")
     
     if not authorization or not authorization.startswith("Bearer "):
@@ -55,7 +57,7 @@ def verify_token(authorization: str = Header(None)):
         )
 
     token = authorization.split(" ")[1]
-    if token != os.getenv("SCRAPE_API_TOKEN"):
+    if token != os.getenv(SCRAPE_API_TOKEN_PATH):
         raise HTTPException(status_code=401, detail="Invalid token")
 
     return token
@@ -70,12 +72,14 @@ async def initiate_scraping(
     return ScrapeResponse(data=data)
 
 
-@app.post("/api/update_courses", response_model=UpdateCoursesResponse)
+@app.post("/api/update-courses", response_model=UpdateCoursesResponse)
 async def update_courses(
     request: UpdateCoursesRequest,
     token: str = Depends(verify_token)
 ):
-    pass
+    data = scrape_sem(isHs=request.is_hs, year=request.year)
+    changelog = uploadCourses(data, isHs=request.is_hs, year=request.year, whatif_mode=request.whatif_mode, deprecated_upload=request.deprecated_upload)
+    return UpdateCoursesResponse(changelog=changelog)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5000)
