@@ -61,24 +61,10 @@ struct CreateTemplateView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
+                    Button("Publish", systemImage: "paperplane.fill") {
                         (isPublishViewShown, alertMessage) = viewModel.checkGraduationRequirements
-                    } label: {
-                        HStack {
-                            Image(systemName: "paperplane.fill")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(.white)
-                            Text("Publish")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundStyle(.white)
-                        }
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 8)
-                        .background {
-                            Color("Color1")
-                        }
-                        .cornerRadius(30)
                     }
+                    .tint(Color("Color1"))
                 }
             }
             .onAppear {
@@ -231,24 +217,11 @@ struct CreateTemplateSemesterView: View {
                 HStack {
                     Spacer()
 
-                    HStack {
-                        Image(systemName: "plus")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.white)
-                        Text("Add Semester")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.white)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 7)
-                    .background {
-                        Color("Color1")
-                    }
-                    .cornerRadius(30)
-                    .onTapGesture {
-                        if(viewModel.courses.count <= 9) {
-                            viewModel.courses.append([])
-                        }
+                    if #available(iOS 26.0, *) {
+                        addSemesterButton
+                            .glassEffect()
+                    } else {
+                        addSemesterButton
                     }
                     
                     Spacer()
@@ -256,6 +229,29 @@ struct CreateTemplateSemesterView: View {
                 .padding(.top, 30)
                 .padding(.bottom, 90)
             }
+        }
+    }
+    
+    var addSemesterButton: some View {
+        Button {
+            if(viewModel.courses.count <= 9) {
+                viewModel.courses.append([])
+            }
+        } label: {
+            HStack {
+                Image(systemName: "plus")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.white)
+                Text("Add Semester")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background {
+                Color("Color1")
+            }
+            .cornerRadius(30)
         }
     }
 }

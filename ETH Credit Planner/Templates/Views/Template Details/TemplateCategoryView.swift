@@ -49,11 +49,16 @@ struct TemplateCategoryView: View {
             .navigationTitle("\(template.authorName)'s Study Plan")
             .background(Color(UIColor.systemGroupedBackground))
             .toolbar {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(Color(UIColor.systemGray3))
-                    .onTapGesture {
-                        isPresented = false
+                Button {
+                    isPresented = false
+                } label: {
+                    if #available(iOS 26.0, *) {
+                        Image(systemName: "xmark")
+                    } else {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(Color(UIColor.systemGray3))
                     }
+                }
             }
             .onAppear {
                 SimpleAnalytics.shared.track(path: ["templates", "topic", "template-overview", "category"])

@@ -62,20 +62,27 @@ struct AddCourseView: View {
                     allCourses
                         .padding(.top, searchText.isEmpty ? 15 : 0)
                 }
+                .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             }
             .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("Add Course")
-            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $isAddCustomCourseViewShown) {
                 AddCustomCourseView(isPresented: $isAddCustomCourseViewShown, semester: semester)
             }
             .toolbar {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(Color(UIColor.systemGray3))
-                    .onTapGesture {
-                        isPresented = false
-                    }
+                if #available(iOS 26.0, *) {
+                    Image(systemName: "xmark")
+                        .onTapGesture {
+                            isPresented = false
+                        }
+                } else {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(Color(UIColor.systemGray3))
+                        .onTapGesture {
+                            isPresented = false
+                        }
+                }
             }
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
             .onChange(of: searchText) {
@@ -152,179 +159,197 @@ struct AddCourseView: View {
     var searchFilter: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
-                Menu {
-                    ForEach(categories, id: \.self) { category in
-                        Button {
-                            selectedCategory = category
-                            filteredCourses = courses
-                            
-                            if let semester = selectedSemester {
-                                filteredCourses = courses.filterBySemesterIndex(viewModel.calculateSemesterIndex(from: semesterStrings[semester]) ?? 0)
-                            }
-                            
-                            if let selectedCategoryId = selectedCategory?.id {
-                                filteredCourses = filteredCourses.filter { $0.category == selectedCategoryId }
-                            }
-                            
-                            filteredCourses = filteredCourses.filter { course in
-                               searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
-                           }
-                            
-                            filteredCourses.sort { $0.category < $1.category }
-                            filteredCourses = filteredCourses.filter { filteredCourse in
-                                // Check if there is a passedCourse with the same main ID (part before "&&")
-                                let hasMatchingPrefix = passedCourses.contains { passedCourse in
-                                    // Safely extract the main ID (part before "&&") for both courses
-                                    let filteredCourseMainID = filteredCourse.id.split(separator: "&&").first.map(String.init) ?? filteredCourse.id
-                                    let passedCourseMainID = passedCourse.id?.split(separator: "&&").first.map(String.init) ?? passedCourse.id
-                                    
-                                    // Compare the main IDs, ensuring nil-safe comparison
-                                    return filteredCourseMainID == passedCourseMainID
-                                }
-                                
-                                // Keep the course if no matching passedCourse is found
-                                return !hasMatchingPrefix
-                            }
-
-                        } label: {
-                            Text(category.name ?? "")
-                        }
-                    }
-                    
-                    Button {
-                        selectedCategory = nil
-                        filteredCourses = courses
-                        
-                        if let semester = selectedSemester {
-                            filteredCourses = courses.filterBySemesterIndex(viewModel.calculateSemesterIndex(from: semesterStrings[semester]) ?? 0)
-                        }
-                        
-                        filteredCourses = filteredCourses.filter { course in
-                           searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
-                       }
-                        
-                        filteredCourses.sort { $0.category < $1.category }
-                        filteredCourses = filteredCourses.filter { filteredCourse in
-                            // Check if there is a passedCourse with the same main ID (part before "&&")
-                            let hasMatchingPrefix = passedCourses.contains { passedCourse in
-                                // Safely extract the main ID (part before "&&") for both courses
-                                let filteredCourseMainID = filteredCourse.id.split(separator: "&&").first.map(String.init) ?? filteredCourse.id
-                                let passedCourseMainID = passedCourse.id?.split(separator: "&&").first.map(String.init) ?? passedCourse.id
-                                
-                                // Compare the main IDs, ensuring nil-safe comparison
-                                return filteredCourseMainID == passedCourseMainID
-                            }
-                            
-                            // Keep the course if no matching passedCourse is found
-                            return !hasMatchingPrefix
-                        }
-
-                    } label: {
-                        Text("All Courses")
-                    }
-                } label: {
-                    HStack {
-                        if(selectedCategory == nil) {
-                            Text("All Categories")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(Color(UIColor.label))
-                        } else {
-                            Text("\(selectedCategory!.name ?? "")")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(Color(UIColor.label))
-                        }
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(Color(UIColor.label))
-                    }
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .background {
-                        Color(UIColor.secondarySystemGroupedBackground)
-                    }
-                    .cornerRadius(20)
+                if #available(iOS 26.0, *) {
+                    categoryFilterButton
+                        .glassEffect()
+                } else {
+                    categoryFilterButton
                 }
                 
-                Menu {
-                    if(categories.count > 0 && semesterStrings.count == 5) {
-                        ForEach(0..<5, id: \.self) { semester in
-                            Button {
-                                selectedSemester = semester
-                                
-                                filteredCourses = courses.filterBySemesterIndex(viewModel.calculateSemesterIndex(from: semesterStrings[semester]) ?? 0)
-                                
-                                if let selectedCategoryId = selectedCategory?.id {
-                                    filteredCourses = filteredCourses.filter { $0.category == selectedCategoryId }
-                                }
-                                
-                                filteredCourses = filteredCourses.filter { course in
-                                    searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
-                                }
-                                
-                                filteredCourses.sort { $0.category < $1.category }
-                                filteredCourses = filteredCourses.filter { filteredCourse in
-                                    // Check if there is a passedCourse with the same main ID (part before "&&")
-                                    let hasMatchingPrefix = passedCourses.contains { passedCourse in
-                                        // Extract the main ID (part before "&&") for both courses
-                                        let filteredCourseMainID = filteredCourse.id.split(separator: "&&").first.map(String.init) ?? filteredCourse.id
-                                        let passedCourseMainID = passedCourse.id?.split(separator: "&&").first.map(String.init) ?? passedCourse.id
-                                        
-                                        // Compare the main IDs
-                                        return filteredCourseMainID == passedCourseMainID
-                                    }
-                                    
-                                    // Keep the course if no matching passedCourse is found
-                                    return !hasMatchingPrefix
-                                }
-                                
-                                // reset semester
-                                self.semester = nil
-                            } label: {
-                                Text("\(semesterStrings[semester])")
-                            }
-                        }
+                if #available(iOS 26.0, *) {
+                    semesterFilterButton
+                        .glassEffect()
+                } else {
+                    semesterFilterButton
+                }
+            }
+        }
+    }
+    
+    var categoryFilterButton: some View {
+        Menu {
+            ForEach(categories, id: \.self) { category in
+                Button {
+                    selectedCategory = category
+                    filteredCourses = courses
+                    
+                    if let semester = selectedSemester {
+                        filteredCourses = courses.filterBySemesterIndex(viewModel.calculateSemesterIndex(from: semesterStrings[semester]) ?? 0)
                     }
                     
-                    Button {
-                        selectedSemester = nil
+                    if let selectedCategoryId = selectedCategory?.id {
+                        filteredCourses = filteredCourses.filter { $0.category == selectedCategoryId }
+                    }
+                    
+                    filteredCourses = filteredCourses.filter { course in
+                       searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
+                   }
+                    
+                    filteredCourses.sort { $0.category < $1.category }
+                    filteredCourses = filteredCourses.filter { filteredCourse in
+                        // Check if there is a passedCourse with the same main ID (part before "&&")
+                        let hasMatchingPrefix = passedCourses.contains { passedCourse in
+                            // Safely extract the main ID (part before "&&") for both courses
+                            let filteredCourseMainID = filteredCourse.id.split(separator: "&&").first.map(String.init) ?? filteredCourse.id
+                            let passedCourseMainID = passedCourse.id?.split(separator: "&&").first.map(String.init) ?? passedCourse.id
+                            
+                            // Compare the main IDs, ensuring nil-safe comparison
+                            return filteredCourseMainID == passedCourseMainID
+                        }
                         
-                        filteredCourses = courses
+                        // Keep the course if no matching passedCourse is found
+                        return !hasMatchingPrefix
+                    }
+
+                } label: {
+                    Text(category.name ?? "")
+                }
+            }
+            
+            Button {
+                selectedCategory = nil
+                filteredCourses = courses
+                
+                if let semester = selectedSemester {
+                    filteredCourses = courses.filterBySemesterIndex(viewModel.calculateSemesterIndex(from: semesterStrings[semester]) ?? 0)
+                }
+                
+                filteredCourses = filteredCourses.filter { course in
+                   searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
+               }
+                
+                filteredCourses.sort { $0.category < $1.category }
+                filteredCourses = filteredCourses.filter { filteredCourse in
+                    // Check if there is a passedCourse with the same main ID (part before "&&")
+                    let hasMatchingPrefix = passedCourses.contains { passedCourse in
+                        // Safely extract the main ID (part before "&&") for both courses
+                        let filteredCourseMainID = filteredCourse.id.split(separator: "&&").first.map(String.init) ?? filteredCourse.id
+                        let passedCourseMainID = passedCourse.id?.split(separator: "&&").first.map(String.init) ?? passedCourse.id
+                        
+                        // Compare the main IDs, ensuring nil-safe comparison
+                        return filteredCourseMainID == passedCourseMainID
+                    }
+                    
+                    // Keep the course if no matching passedCourse is found
+                    return !hasMatchingPrefix
+                }
+
+            } label: {
+                Text("All Courses")
+            }
+        } label: {
+            HStack {
+                if(selectedCategory == nil) {
+                    Text("All Categories")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color(UIColor.label))
+                } else {
+                    Text("\(selectedCategory!.name ?? "")")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color(UIColor.label))
+                }
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Color(UIColor.label))
+            }
+            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
+            .background {
+                Color(UIColor.secondarySystemGroupedBackground)
+            }
+            .cornerRadius(20)
+        }
+    }
+    
+    var semesterFilterButton: some View {
+        Menu {
+            if(categories.count > 0 && semesterStrings.count == 5) {
+                ForEach(0..<5, id: \.self) { semester in
+                    Button {
+                        selectedSemester = semester
+                        
+                        filteredCourses = courses.filterBySemesterIndex(viewModel.calculateSemesterIndex(from: semesterStrings[semester]) ?? 0)
                         
                         if let selectedCategoryId = selectedCategory?.id {
                             filteredCourses = filteredCourses.filter { $0.category == selectedCategoryId }
                         }
                         
                         filteredCourses = filteredCourses.filter { course in
-                           searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
-                       }
+                            searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
+                        }
                         
                         filteredCourses.sort { $0.category < $1.category }
-                    } label: {
-                        Text("All Semesters")
-                    }
-                } label: {
-                    HStack {
-                        if(selectedSemester == nil || (selectedSemester! == -1 || selectedSemester! > (semesterStrings.count - 1))) {
-                            Text("All Semesters")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(Color(UIColor.label))
-                        } else {
-                            Text("\(semesterStrings[selectedSemester!])")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(Color(UIColor.label))
+                        filteredCourses = filteredCourses.filter { filteredCourse in
+                            // Check if there is a passedCourse with the same main ID (part before "&&")
+                            let hasMatchingPrefix = passedCourses.contains { passedCourse in
+                                // Extract the main ID (part before "&&") for both courses
+                                let filteredCourseMainID = filteredCourse.id.split(separator: "&&").first.map(String.init) ?? filteredCourse.id
+                                let passedCourseMainID = passedCourse.id?.split(separator: "&&").first.map(String.init) ?? passedCourse.id
+                                
+                                // Compare the main IDs
+                                return filteredCourseMainID == passedCourseMainID
+                            }
+                            
+                            // Keep the course if no matching passedCourse is found
+                            return !hasMatchingPrefix
                         }
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(Color(UIColor.label))
+                        
+                        // reset semester
+                        self.semester = nil
+                    } label: {
+                        Text("\(semesterStrings[semester])")
                     }
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .background {
-                        Color(UIColor.secondarySystemGroupedBackground)
-                    }
-                    .cornerRadius(20)
                 }
             }
+            
+            Button {
+                selectedSemester = nil
+                
+                filteredCourses = courses
+                
+                if let selectedCategoryId = selectedCategory?.id {
+                    filteredCourses = filteredCourses.filter { $0.category == selectedCategoryId }
+                }
+                
+                filteredCourses = filteredCourses.filter { course in
+                   searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
+               }
+                
+                filteredCourses.sort { $0.category < $1.category }
+            } label: {
+                Text("All Semesters")
+            }
+        } label: {
+            HStack {
+                if(selectedSemester == nil || (selectedSemester! == -1 || selectedSemester! > (semesterStrings.count - 1))) {
+                    Text("All Semesters")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color(UIColor.label))
+                } else {
+                    Text("\(semesterStrings[selectedSemester!])")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color(UIColor.label))
+                }
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Color(UIColor.label))
+            }
+            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
+            .background {
+                Color(UIColor.secondarySystemGroupedBackground)
+            }
+            .cornerRadius(20)
         }
     }
     

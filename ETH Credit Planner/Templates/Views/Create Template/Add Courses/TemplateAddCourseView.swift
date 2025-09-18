@@ -43,23 +43,28 @@ struct TemplateAddCourseView: View {
             ScrollView {
                 VStack {
                     searchFilter
-                        .padding(.horizontal, 16)
                     
                     if(categories.count > 0) {
                         allCourses
                             .padding(.top, searchText.isEmpty ? 15 : 0)
-                            .padding(.horizontal, 16)
                     }
                 }
             }
+            .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
             .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("Add Course")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(Color(UIColor.systemGray3))
-                    .onTapGesture {
-                        isPresented = false
+                Button {
+                    isPresented = false
+                } label: {
+                    if #available(iOS 26.0, *) {
+                        Image(systemName: "xmark")
+                    } else {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(Color(UIColor.systemGray3))
                     }
+                }
             }
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
             .onChange(of: searchText) {
@@ -106,132 +111,150 @@ struct TemplateAddCourseView: View {
     var searchFilter: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack {
-                Menu {
-                    ForEach(categories, id: \.self) { category in
-                        Button {
-                            selectedCategory = category
-                            filteredCourses = courses
-                            
-                            if let semester = selectedSemester {
-                                filteredCourses = courses.filterBySemesterIndex(viewModel.calculateSemesterIndex(from: semesterStrings[semester]) ?? 0)
-                            }
-                            
-                            if let selectedCategoryId = selectedCategory?.id {
-                                filteredCourses = filteredCourses.filter { $0.category == selectedCategoryId }
-                            }
-                            
-                            filteredCourses = filteredCourses.filter { course in
-                               searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
-                           }
-                            
-                            filteredCourses.sort { $0.category < $1.category }
-                        } label: {
-                            Text(category.name ?? "")
-                        }
-                    }
-                    
-                    Button {
-                        selectedCategory = nil
-                        filteredCourses = courses
-                        
-                        if let semester = selectedSemester {
-                            filteredCourses = courses.filterBySemesterIndex(viewModel.calculateSemesterIndex(from: semesterStrings[semester]) ?? 0)
-                        }
-                        
-                        filteredCourses = filteredCourses.filter { course in
-                           searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
-                       }
-                        
-                        filteredCourses.sort { $0.category < $1.category }
-                    } label: {
-                        Text("All Courses")
-                    }
-                } label: {
-                    HStack {
-                        if(selectedCategory == nil) {
-                            Text("All Categories")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(Color(UIColor.label))
-                        } else {
-                            Text("\(selectedCategory!.name ?? "")")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(Color(UIColor.label))
-                        }
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(Color(UIColor.label))
-                    }
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .background {
-                        Color(UIColor.secondarySystemGroupedBackground)
-                    }
-                    .cornerRadius(20)
+                if #available(iOS 26.0, *) {
+                    categoryFilterButton
+                        .glassEffect()
+                } else {
+                    categoryFilterButton
                 }
                 
-                Menu {
-                    if(categories.count > 0 && semesterStrings.count == 5) {
-                        ForEach(0..<5, id: \.self) { semester in
-                            Button {
-                                selectedSemester = semester
-                                
-                                filteredCourses = courses.filterBySemesterIndex(viewModel.calculateSemesterIndex(from: semesterStrings[semester]) ?? 0)
-                                
-                                if let selectedCategoryId = selectedCategory?.id {
-                                    filteredCourses = filteredCourses.filter { $0.category == selectedCategoryId }
-                                }
-                                
-                                filteredCourses = filteredCourses.filter { course in
-                                    searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
-                                }
-                                
-                                filteredCourses.sort { $0.category < $1.category }
-                            } label: {
-                                Text("\(semesterStrings[semester])")
-                            }
-                        }
+                if #available(iOS 26.0, *) {
+                    semesterFilterButton
+                        .glassEffect()
+                } else {
+                    semesterFilterButton
+                }
+            }
+        }
+    }
+    
+    var categoryFilterButton: some View {
+        Menu {
+            ForEach(categories, id: \.self) { category in
+                Button {
+                    selectedCategory = category
+                    filteredCourses = courses
+                    
+                    if let semester = selectedSemester {
+                        filteredCourses = courses.filterBySemesterIndex(viewModel.calculateSemesterIndex(from: semesterStrings[semester]) ?? 0)
                     }
                     
+                    if let selectedCategoryId = selectedCategory?.id {
+                        filteredCourses = filteredCourses.filter { $0.category == selectedCategoryId }
+                    }
+                    
+                    filteredCourses = filteredCourses.filter { course in
+                       searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
+                   }
+                    
+                    filteredCourses.sort { $0.category < $1.category }
+                } label: {
+                    Text(category.name ?? "")
+                }
+            }
+            
+            Button {
+                selectedCategory = nil
+                filteredCourses = courses
+                
+                if let semester = selectedSemester {
+                    filteredCourses = courses.filterBySemesterIndex(viewModel.calculateSemesterIndex(from: semesterStrings[semester]) ?? 0)
+                }
+                
+                filteredCourses = filteredCourses.filter { course in
+                   searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
+               }
+                
+                filteredCourses.sort { $0.category < $1.category }
+            } label: {
+                Text("All Courses")
+            }
+        } label: {
+            HStack {
+                if(selectedCategory == nil) {
+                    Text("All Categories")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color(UIColor.label))
+                } else {
+                    Text("\(selectedCategory!.name ?? "")")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color(UIColor.label))
+                }
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Color(UIColor.label))
+            }
+            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
+            .background {
+                Color(UIColor.secondarySystemGroupedBackground)
+            }
+            .cornerRadius(20)
+        }
+    }
+    
+    var semesterFilterButton: some View {
+        Menu {
+            if(categories.count > 0 && semesterStrings.count == 5) {
+                ForEach(0..<5, id: \.self) { semester in
                     Button {
-                        selectedSemester = nil
+                        selectedSemester = semester
                         
-                        filteredCourses = courses
+                        filteredCourses = courses.filterBySemesterIndex(viewModel.calculateSemesterIndex(from: semesterStrings[semester]) ?? 0)
                         
                         if let selectedCategoryId = selectedCategory?.id {
                             filteredCourses = filteredCourses.filter { $0.category == selectedCategoryId }
                         }
                         
                         filteredCourses = filteredCourses.filter { course in
-                           searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
-                       }
+                            searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
+                        }
                         
                         filteredCourses.sort { $0.category < $1.category }
                     } label: {
-                        Text("All Semesters")
+                        Text("\(semesterStrings[semester])")
                     }
-                } label: {
-                    HStack {
-                        if(selectedSemester == nil || (selectedSemester! == -1 || selectedSemester! > (semesterStrings.count - 1))) {
-                            Text("All Semesters")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(Color(UIColor.label))
-                        } else {
-                            Text("\(semesterStrings[selectedSemester!])")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(Color(UIColor.label))
-                        }
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(Color(UIColor.label))
-                    }
-                    .padding(.vertical, 5)
-                    .padding(.horizontal, 10)
-                    .background {
-                        Color(UIColor.secondarySystemGroupedBackground)
-                    }
-                    .cornerRadius(20)
                 }
             }
+            
+            Button {
+                selectedSemester = nil
+                
+                filteredCourses = courses
+                
+                if let selectedCategoryId = selectedCategory?.id {
+                    filteredCourses = filteredCourses.filter { $0.category == selectedCategoryId }
+                }
+                
+                filteredCourses = filteredCourses.filter { course in
+                   searchText.isEmpty || course.name.localizedCaseInsensitiveContains(searchText)
+               }
+                
+                filteredCourses.sort { $0.category < $1.category }
+            } label: {
+                Text("All Semesters")
+            }
+        } label: {
+            HStack {
+                if(selectedSemester == nil || (selectedSemester! == -1 || selectedSemester! > (semesterStrings.count - 1))) {
+                    Text("All Semesters")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color(UIColor.label))
+                } else {
+                    Text("\(semesterStrings[selectedSemester!])")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color(UIColor.label))
+                }
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(Color(UIColor.label))
+            }
+            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
+            .background {
+                Color(UIColor.secondarySystemGroupedBackground)
+            }
+            .cornerRadius(20)
         }
     }
     

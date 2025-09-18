@@ -64,7 +64,7 @@ struct PublishTemplateView: View {
                             .foregroundStyle(selectedTags.count > 2 && !title.isEmpty ? .white : Color(UIColor.label))
                     }
                     .frame(height: 54)
-                    .cornerRadius(15)
+                    .cornerRadiusTextField()
                     .padding(.horizontal, 16)
                 }
                 .alert("Error", isPresented: $isNameAlertShown) {
@@ -117,7 +117,7 @@ struct PublishTemplateView: View {
                             .foregroundStyle(.white)
                     }
                     .frame(width: 32, height: 32)
-                    .cornerRadius(5)
+                    .cornerRadiusIcon()
                     
                     TextField("Title", text: $title)
                         .font(.system(size: 17, weight: .medium))
@@ -125,7 +125,7 @@ struct PublishTemplateView: View {
                 .padding(.horizontal, 12)
             }
             .frame(height: 52)
-            .cornerRadius(10)
+            .cornerRadiusTextField()
         }
     }
 }

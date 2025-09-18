@@ -73,16 +73,14 @@ struct CategoryOverviewView: View {
             
             VStack {
                 HStack {
-                    ZStack {
-                        Color("Color1")
-                        Image(systemName: "gauge")
-                            .cornerRadius(10)
-                            .foregroundColor(.white)
-                            .fontWeight(.semibold)
-                        Spacer()
-                    }
-                    .frame(width: 27, height: 27)
-                    .cornerRadius(5)
+                    Image(systemName: "gauge")
+                        .foregroundColor(.white)
+                        .fontWeight(.semibold)
+                        .frame(width: 30, height: 30)
+                        .background {
+                            Color("Color1")
+                        }
+                        .cornerRadiusIcon()
                     
                     
                     Text("Credits")
@@ -215,6 +213,24 @@ struct AddCourseButton: View {
         HStack {
             Spacer()
 
+            if #available(iOS 26.0, *) {
+                button
+                    .glassEffect()
+            } else {
+                button
+            }
+            
+            Spacer()
+        }
+    }
+    
+    var button: some View {
+        Button {
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+            
+            isAddCoursePopupShown = true
+        } label: {
             HStack {
                 Image(systemName: "plus")
                     .font(.system(size: 20, weight: .semibold))
@@ -229,14 +245,6 @@ struct AddCourseButton: View {
                 Color("Color1")
             }
             .cornerRadius(30)
-            .onTapGesture {
-                let generator = UIImpactFeedbackGenerator(style: .medium)
-                generator.impactOccurred()
-                
-                isAddCoursePopupShown = true
-            }
-            
-            Spacer()
         }
     }
 }

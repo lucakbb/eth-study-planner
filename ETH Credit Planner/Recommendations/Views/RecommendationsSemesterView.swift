@@ -63,11 +63,18 @@ struct RecommendationsSemesterView: View {
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(Color(UIColor.systemGray3))
-                        .onTapGesture {
-                            recommendation = nil
-                        }
+                    if #available(iOS 26.0, *) {
+                        Image(systemName: "xmark")
+                            .onTapGesture {
+                                recommendation = nil
+                            }
+                    } else {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(Color(UIColor.systemGray3))
+                            .onTapGesture {
+                                recommendation = nil
+                            }
+                    }
                 }
             }
             .onAppear {

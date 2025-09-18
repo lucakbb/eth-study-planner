@@ -38,7 +38,7 @@ struct AddCustomCourseView: View {
                                             .foregroundStyle(.white)
                                     }
                                     .frame(width: 32, height: 32)
-                                    .cornerRadius(5)
+                                    .cornerRadiusIcon()
                                     
                                     TextField("Name", text: $viewModel.title)
                                         .font(.system(size: 17, weight: .medium))
@@ -46,7 +46,7 @@ struct AddCustomCourseView: View {
                                 .padding(.horizontal, 12)
                             }
                             .frame(height: 52)
-                            .cornerRadius(10)
+                            .cornerRadiusTextField()
                             
                             ZStack {
                                 Color(UIColor.secondarySystemGroupedBackground)
@@ -60,10 +60,10 @@ struct AddCustomCourseView: View {
                                             .foregroundStyle(.white)
                                     }
                                     .frame(width: 32, height: 32)
-                                    .cornerRadius(5)
+                                    .cornerRadiusIcon()
                                     
                                     Text("Credits: \(viewModel.credits)")
-                                        .font(.system(size: 20, weight: .semibold))
+                                        .font(.system(size: 18, weight: .medium))
                                     
                                     Spacer()
                                     
@@ -73,7 +73,7 @@ struct AddCustomCourseView: View {
                                 .padding(.horizontal, 12)
                             }
                             .frame(height: 52)
-                            .cornerRadius(10)
+                            .cornerRadiusTextField()
                         }
                         
                         VStack(alignment: .leading, spacing: 5) {
@@ -114,7 +114,7 @@ struct AddCustomCourseView: View {
                         .foregroundStyle((viewModel.title != "" && viewModel.selectedCategory != nil && viewModel.selectedSemester != nil) ? .white: Color(UIColor.label))
                 }
                 .frame(height: 54)
-                .cornerRadius(15)
+                .cornerRadiusTextField()
                 .padding(.horizontal, 16)
                 .padding(.bottom, 10)
                 .onTapGesture {
@@ -138,11 +138,18 @@ struct AddCustomCourseView: View {
                 }
             }
             .toolbar {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(Color(UIColor.systemGray3))
-                    .onTapGesture {
-                        isPresented = false
-                    }
+                if #available(iOS 26.0, *) {
+                    Image(systemName: "xmark")
+                        .onTapGesture {
+                            isPresented = false
+                        }
+                } else {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(Color(UIColor.systemGray3))
+                        .onTapGesture {
+                            isPresented = false
+                        }
+                }
             }
         }
     }
@@ -181,4 +188,24 @@ struct CategoryCloud: View {
         .sheet(isPresented: .constant(true)) {
             AddCustomCourseView(isPresented: .constant(false))
         }
+}
+
+extension View {
+    @ViewBuilder
+    func cornerRadiusIcon() -> some View {
+        if #available(iOS 26.0, *) {
+            self.cornerRadius(50)
+        } else {
+            self.cornerRadius(5)
+        }
+    }
+    
+    @ViewBuilder
+    func cornerRadiusTextField() -> some View {
+        if #available(iOS 26.0, *) {
+            self.cornerRadius(50)
+        } else {
+            self.cornerRadius(10)
+        }
+    }
 }

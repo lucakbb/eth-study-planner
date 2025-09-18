@@ -135,14 +135,18 @@ struct TemplateLibraryView: View {
                 NavigationLink {
                     TopicOverviewView(topic: TemplateLibararyTopic(title: "Templates You Liked", icon: "bookmark.fill", color: Color("Color1")))
                 } label: {
-                    Image(systemName: "bookmark.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color(UIColor.label))
-                        .padding(8)
-                        .background {
-                            Circle()
-                                .foregroundColor(Color(UIColor.secondarySystemGroupedBackground))
-                        }
+                    if #available(iOS 26.0, *) {
+                        Image(systemName: "bookmark.fill")
+                    } else {
+                        Image(systemName: "bookmark.fill")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(Color(UIColor.label))
+                            .padding(8)
+                            .background {
+                                Circle()
+                                    .foregroundColor(Color(UIColor.secondarySystemGroupedBackground))
+                            }
+                    }
                 }
             }
             .refreshable {

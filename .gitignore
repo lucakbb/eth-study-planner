@@ -15,9 +15,9 @@
 !*.xcworkspace/contents.xcworkspacedata
 
 ## Config Files
-GoogleService-Info.plist
-Secrets.plist
 local.env
+Secrets.plist
+GoogleService-Info.plist
 
 ## Obj-C/Swift specific
 *.hmap

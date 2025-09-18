@@ -161,7 +161,7 @@ struct ImportCourseView: View {
                                     .foregroundStyle(.white)
                             }
                             .frame(height: 54)
-                            .cornerRadius(15)
+                            .cornerRadiusTextField()
                             .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
                             .padding(.bottom, 10)
                         }
@@ -183,7 +183,7 @@ struct ImportCourseView: View {
                             }
                         }
                         .frame(height: 54)
-                        .cornerRadius(15)
+                        .cornerRadiusTextField()
                         .padding(.horizontal, UIDevice.current.userInterfaceIdiom == .phone ? 16 : 20)
                         .padding(.bottom, 10)
                         .onTapGesture {

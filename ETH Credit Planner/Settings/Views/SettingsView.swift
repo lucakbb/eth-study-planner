@@ -127,7 +127,7 @@ struct SettingsView: View {
                             .font(.system(size: 15, weight: .semibold))
                     }
                     .frame(width: 29, height: 29)
-                    .cornerRadius(5)
+                    .cornerRadiusIcon()
                     
                     Text("Total Semesters: \(semesters.count)")
                         .font(.system(size: 18))
@@ -171,7 +171,7 @@ struct SettingsView: View {
                             .font(.system(size: 15, weight: .semibold))
                     }
                     .frame(width: 29, height: 29)
-                    .cornerRadius(5)
+                    .cornerRadiusIcon()
                     
                     Text("iCloud Sync")
                         .font(.system(size: 18))
@@ -241,11 +241,16 @@ struct SettingsView: View {
                                 .navigationTitle("Licences")
                                 .scrollIndicators(.hidden)
                                 .toolbar {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundStyle(Color(UIColor.systemGray3))
-                                        .onTapGesture {
-                                            isLicencesSheetPresented = false
+                                    Button {
+                                        isLicencesSheetPresented = false
+                                    } label: {
+                                        if #available(iOS 26.0, *) {
+                                            Image(systemName: "xmark")
+                                        } else {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundStyle(Color(UIColor.systemGray3))
                                         }
+                                    }
                                 }
                             }
                         }
@@ -280,10 +285,10 @@ struct SettingsEntryView: View {
                 Color(entry.color)
                 Image(systemName: entry.image)
                     .foregroundColor(.white)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
             }
-            .frame(width: 29, height: 29)
-            .cornerRadius(5)
+            .frame(width: 32, height: 32)
+            .cornerRadiusIcon()
             
             Text("\(entry.name)")
                 .font(.system(size: 18))
@@ -296,7 +301,7 @@ struct SettingsEntryView: View {
         }
         .padding(.vertical, 10)
         .padding(.leading, 13)
-        .padding(.trailing, 14)
+        .padding(.trailing, 20)
     }
 }
 
