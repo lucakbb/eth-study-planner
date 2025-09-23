@@ -1,7 +1,8 @@
 import os
-from fastapi import Depends, FastAPI, HTTPException, Header, Query
+from fastapi import Depends, FastAPI, HTTPException, Header
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
+from services.Recommendations import generate_recommendations
 from services.Scraper import scrape_sem
 from services.FirebaseConnection import uploadCourses
 import uvicorn
@@ -12,12 +13,17 @@ app = FastAPI(title="Study Planner API", version="1.0.0")
 
 
 class RecommendationRequest(BaseModel):
-    user_id: str
-    preferences: Optional[dict] = None
+    totalSemester: int
+    currentSemesterRelative: int
+    currentSemesterIndex: int
+    workload: list[int]
+    takenCourses: list[dict]
+    likedTags: list[str]
+    totalCourses: list[dict]
+    plannedCourses: list[list[dict]]
 
 class RecommendationResponse(BaseModel):
-    recommendations: List[dict]
-    user_id: str
+    recommendations: list[list[dict]]
 
 class ScrapeRequest(BaseModel):
     is_hs: bool
@@ -41,8 +47,18 @@ async def health_check():
     return {"status": "healthy", "service": "Study Planner API"}
 
 @app.post("/api/recommendation", response_model=RecommendationResponse)
-async def generate_recommendations(request: RecommendationRequest):
-    pass
+async def recommendation_request(request: RecommendationRequest):
+    recommendations = generate_recommendations(
+        total_semesters=request.totalSemester,
+        current_semester_relative=request.currentSemesterRelative,
+        current_semester_index=request.currentSemesterIndex,
+        workload=request.workload,
+        taken_courses=request.takenCourses,
+        liked_tags=request.likedTags,
+        total_courses=request.totalCourses,
+        planned_courses=request.plannedCourses
+    )
+    return RecommendationResponse(recommendations=recommendations)
 
 
 def verify_token(authorization: str = Header(None)):
